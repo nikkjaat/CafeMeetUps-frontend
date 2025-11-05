@@ -1,0 +1,342 @@
+.categories {
+  padding: 5rem 0;
+  background: #f9fafb;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding: 0 2rem;
+  }
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.title {
+  font-size: 2.25rem;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.gradientText {
+  background: linear-gradient(135deg, #ec4899, #ef4444);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.description {
+  font-size: 1.25rem;
+  color: #4b5563;
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
+.grid {
+  display: grid;
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.categoryCard {
+  position: relative;
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s;
+  transform: translateY(0);
+}
+
+.categoryCard:hover {
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  transform: translateY(-8px);
+}
+
+.categoryIcon {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  transition: transform 0.3s;
+}
+
+.categoryCard:hover .categoryIcon {
+  transform: scale(1.1);
+}
+
+.categoryIcon svg {
+  width: 2rem;
+  height: 2rem;
+  color: white;
+}
+
+.coffee {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+
+.clubbing {
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+}
+
+.travel {
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+}
+
+.movie {
+  background: linear-gradient(135deg, #ef4444, #ec4899);
+}
+
+.gaming {
+  background: linear-gradient(135deg, #10b981, #3b82f6);
+}
+
+.seriousrelationship {
+  background: linear-gradient(135deg, #ec4899, #ef4444);
+}
+
+.fitness {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.music {
+  background: linear-gradient(135deg, #a855f7, #7c3aed);
+}
+
+.food {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+}
+
+.categoryName {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 0.75rem;
+}
+
+.categoryDescription {
+  color: #4b5563;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.categoryFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.userCount {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.exploreBtn {
+  color: #ec4899;
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.exploreBtn:hover {
+  color: #db2777;
+}
+
+.hoverOverlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.categoryCard:hover .hoverOverlay {
+  opacity: 0.05;
+}
+
+.ctaSection {
+  text-align: center;
+}
+
+.browseBtn {
+  background: linear-gradient(135deg, #ec4899, #ef4444);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  transform: scale(1);
+}
+
+.browseBtn:hover {
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  transform: scale(1.05);
+}
+
+.categoryCard {
+  position: relative;
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s;
+  transform: translateY(0);
+}
+
+.categoryCard:hover {
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  transform: translateY(-8px);
+}
+
+.categoryIcon {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  transition: transform 0.3s;
+}
+
+.categoryCard:hover .categoryIcon {
+  transform: scale(1.1);
+}
+
+.categoryIcon svg {
+  width: 2rem;
+  height: 2rem;
+  color: white;
+}
+
+.coffee {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+
+.clubbing {
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+}
+
+.travel {
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+}
+
+.movie {
+  background: linear-gradient(135deg, #ef4444, #ec4899);
+}
+
+.gaming {
+  background: linear-gradient(135deg, #10b981, #3b82f6);
+}
+
+.serious {
+  background: linear-gradient(135deg, #ec4899, #ef4444);
+}
+
+.categoryName {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 0.75rem;
+}
+
+.categoryDescription {
+  color: #4b5563;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.categoryFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.userCount {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.exploreBtn {
+  color: #ec4899;
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.exploreBtn:hover {
+  color: #db2777;
+}
+
+.hoverOverlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.categoryCard:hover .hoverOverlay {
+  opacity: 0.05;
+}
+
+.ctaSection {
+  text-align: center;
+}
+
+.browseBtn {
+  background: linear-gradient(135deg, #ec4899, #ef4444);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  transform: scale(1);
+}
+
+.browseBtn:hover {
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  transform: scale(1.05);
+}

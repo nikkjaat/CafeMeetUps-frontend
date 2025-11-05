@@ -1,0 +1,246 @@
+.footer {
+  background: #111827;
+  color: white;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 4rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding: 4rem 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding: 4rem 2rem;
+  }
+}
+
+.mainContent {
+  display: grid;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+@media (min-width: 1024px) {
+  .mainContent {
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  }
+}
+
+.brandSection {
+  grid-column: span 2;
+}
+
+@media (min-width: 1024px) {
+  .brandSection {
+    grid-column: span 2;
+  }
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.logoIcon {
+  background: linear-gradient(135deg, #ec4899, #ef4444);
+  padding: 0.5rem;
+  border-radius: 50%;
+}
+
+.logoIcon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: white;
+  fill: currentColor;
+}
+
+.logoText {
+  font-size: 1.5rem;
+  font-weight: bold;
+  background: linear-gradient(135deg, #ec4899, #ef4444);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.brandDescription {
+  color: #9ca3af;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: #9ca3af;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.contactItem svg {
+  width: 1rem;
+  height: 1rem;
+  color: #ec4899;
+}
+
+.linksSection h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.linksList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.linksList a {
+  color: #9ca3af;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.linksList a:hover {
+  color: #ec4899;
+}
+
+.newsletterSection {
+  border-top: 1px solid #374151;
+  padding-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.newsletterContent {
+  max-width: 28rem;
+}
+
+.newsletterTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.newsletterDescription {
+  color: #9ca3af;
+  margin-bottom: 1rem;
+}
+
+.newsletterForm {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.newsletterInput {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  background: #374151;
+  border: 1px solid #4b5563;
+  border-radius: 0.5rem;
+  color: white;
+}
+
+.newsletterInput::placeholder {
+  color: #9ca3af;
+}
+
+.newsletterInput:focus {
+  outline: none;
+  border-color: #ec4899;
+}
+
+.subscribeBtn {
+  background: linear-gradient(135deg, #ec4899, #ef4444);
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.subscribeBtn:hover {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.bottomSection {
+  border-top: 1px solid #374151;
+  padding-top: 2rem;
+}
+
+.bottomContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .bottomContent {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+.copyright {
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+.socialSection {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.socialLabel {
+  color: #9ca3af;
+  font-size: 0.875rem;
+  margin-right: 0.5rem;
+}
+
+.socialLinks {
+  display: flex;
+  gap: 1rem;
+}
+
+.socialLink {
+  width: 2.5rem;
+  height: 2.5rem;
+  background: #374151;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.socialLink:hover {
+  background: #ec4899;
+}
+
+.socialLink svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}

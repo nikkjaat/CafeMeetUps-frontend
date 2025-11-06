@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   X,
   Eye,
@@ -16,10 +16,13 @@ import {
   Gamepad2,
   HeartHandshake,
   Dumbbell,
+  Music,
   Utensils,
+  User,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useForm } from "react-hook-form";
+import SocialAuthButtons from "./SocialAuthButtons";
 import styles from "../styles/AuthModal.module.css";
 
 const AuthModal = ({ isOpen, onClose, initialMode = "login" }) => {
@@ -31,7 +34,15 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }) => {
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState([]);
   const fileInputRef = useRef(null);
-  const { login, register, isLoading } = useAuth();
+  const {
+    login,
+    register,
+    loginWithGoogle,
+    loginWithFacebook,
+    registerWithGoogle,
+    registerWithFacebook,
+    isLoading,
+  } = useAuth();
   const {
     register: formRegister,
     handleSubmit,
@@ -39,18 +50,20 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }) => {
     reset,
     watch,
     setValue,
+    trigger,
   } = useForm();
 
   const watchPassword = watch("password");
   const watchGender = watch("gender");
   const watchInterestedIn = watch("interestedIn");
+  const watchBio = watch("bio");
 
-  // Interests data with icons
-  const interests = [
+  // All 9 interests data with icons
+  const allInterests = [
     { id: "coffee", name: "Coffee", icon: Coffee },
     { id: "clubbing", name: "Clubbing", icon: Martini },
     { id: "travel", name: "Travel", icon: Plane },
-    { id: "movie", name: "Movie", icon: Film },
+    { id: "movies", name: "Movies", icon: Film },
     { id: "gaming", name: "Gaming", icon: Gamepad2 },
     {
       id: "serious-relationship",
@@ -58,10 +71,57 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }) => {
       icon: HeartHandshake,
     },
     { id: "fitness", name: "Fitness", icon: Dumbbell },
-    { id: "foodie", name: "Foodie", icon: Utensils },
+    { id: "music", name: "Music", icon: Music },
+    { id: "food", name: "Food", icon: Utensils },
   ];
 
+  // Update form value when selectedInterests changes
+  useEffect(() => {
+    setValue("selectedInterests", selectedInterests, { shouldValidate: true });
+  }, [selectedInterests, setValue]);
+
   if (!isOpen) return null;
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
+  const removePhoto = () => {
+    setProfilePhoto(null);
+    setPhotoPreview("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleInterestToggle = async (interestId) => {
+    setSelectedInterests((prev) => {
+      let newSelection;
+      if (prev.includes(interestId)) {
+        newSelection = prev.filter((id) => id !== interestId);
+      } else {
+        if (prev.length >= 4) {
+          return prev; // Max 4 interests
+        }
+        newSelection = [...prev, interestId];
+      }
+      return newSelection;
+    });
+  };
+
+  const calculateAge = (birthDate) => {
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
+      age--;
+    }
+    return age;
+  };
 
   const handlePhotoUpload = (event) => {
     const file = event.target.files[0];
@@ -82,53 +142,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }) => {
       setProfilePhoto(file);
       const previewUrl = URL.createObjectURL(file);
       setPhotoPreview(previewUrl);
-      setValue("profilePhoto", file);
     }
-  };
-
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
-
-  const removePhoto = () => {
-    setProfilePhoto(null);
-    setPhotoPreview("");
-    setValue("profilePhoto", "");
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const handleInterestToggle = (interestId) => {
-    setSelectedInterests((prev) => {
-      let newSelection;
-      if (prev.includes(interestId)) {
-        newSelection = prev.filter((id) => id !== interestId);
-      } else {
-        if (prev.length >= 4) {
-          return prev; // Max 4 interests
-        }
-        newSelection = [...prev, interestId];
-      }
-
-      // Update form value
-      setValue("interests", newSelection);
-      return newSelection;
-    });
-  };
-
-  const calculateAge = (birthDate) => {
-    const today = new Date();
-    const birth = new Date(birthDate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birth.getDate())
-    ) {
-      age--;
-    }
-    return age;
   };
 
   const onSubmit = async (data) => {
@@ -139,22 +153,49 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }) => {
         onClose();
       }
     } else {
+      // Validate interests before submitting
+      if (selectedInterests.length === 0) {
+        alert("Please select at least one interest");
+        return;
+      }
+
+      // Prepare form data for registration
       const formData = new FormData();
 
-      Object.keys(data).forEach((key) => {
-        if (key === "profilePhoto" && data[key]) {
-          formData.append("profilePhoto", data[key]);
-        } else if (key === "interests" && data[key]) {
-          formData.append("interests", JSON.stringify(data[key]));
-        } else if (key === "birthDate") {
-          formData.append("birthDate", new Date(data[key]).toISOString());
-          formData.append("age", calculateAge(data[key]));
-        } else if (data[key]) {
-          formData.append(key, data[key]);
-        }
-      });
+      // Append all basic fields
+      formData.append("fullName", data.fullName);
+      formData.append("email", data.email);
+      formData.append("password", data.password);
+      formData.append("birthDate", data.birthDate);
+      formData.append("gender", data.gender);
+      formData.append("location", data.location);
+      formData.append("interestedIn", data.interestedIn);
+      formData.append("relationshipType", data.relationshipType);
+      formData.append("bio", data.bio);
 
-      formData.append("agreeToTerms", agreeToTerms);
+      // Calculate and append age
+      const age = calculateAge(data.birthDate);
+      formData.append("age", age.toString());
+
+      // Append selectedInterests as comma-separated string (simpler for backend)
+      if (selectedInterests.length > 0) {
+        formData.append("selectedInterests", selectedInterests.join(","));
+      }
+
+      // Append phone number if provided
+      if (data.phoneNumber) {
+        formData.append("phoneNumber", data.phoneNumber);
+      }
+
+      // Append profile photo if exists
+      if (profilePhoto) {
+        formData.append("profilePhoto", profilePhoto);
+      }
+
+      // Append terms agreement
+      formData.append("agreeToTerms", agreeToTerms.toString());
+
+      console.log("Submitting form data with interests:", selectedInterests);
 
       const result = await register(formData);
       if (result.success) {
@@ -165,6 +206,34 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }) => {
         setSelectedInterests([]);
         onClose();
       }
+    }
+  };
+
+  const handleSocialAuth = async (provider, isRegister = false) => {
+    try {
+      let result;
+      if (provider === "google") {
+        result = isRegister
+          ? await registerWithGoogle()
+          : await loginWithGoogle();
+      } else if (provider === "facebook") {
+        result = isRegister
+          ? await registerWithFacebook()
+          : await loginWithFacebook();
+      }
+
+      if (result.success) {
+        reset();
+        setProfilePhoto(null);
+        setPhotoPreview("");
+        setAgreeToTerms(false);
+        setSelectedInterests([]);
+        onClose();
+      } else {
+        alert(result.error || "Social authentication failed");
+      }
+    } catch (error) {
+      alert(error.message || "Social authentication failed");
     }
   };
 
@@ -196,6 +265,20 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }) => {
               ? "Sign in to continue your journey"
               : "Create your account and start your love story"}
           </p>
+        </div>
+
+        {/* Social Auth Buttons */}
+        <SocialAuthButtons
+          mode={mode}
+          onGoogleAuth={() => handleSocialAuth("google", mode === "register")}
+          onFacebookAuth={() =>
+            handleSocialAuth("facebook", mode === "register")
+          }
+          isLoading={isLoading}
+        />
+
+        <div className={styles.divider}>
+          <span>or continue with email</span>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
@@ -352,7 +435,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }) => {
                   )}
                 </div>
 
-                {/* New Interests Field */}
+                {/* Interests Field */}
                 <div className={styles.inputGroup}>
                   <label className={styles.label}>
                     Interests (max 4) *
@@ -361,7 +444,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }) => {
                     </span>
                   </label>
                   <div className={styles.interestsGrid}>
-                    {interests.map((interest) => {
+                    {allInterests.map((interest) => {
                       const IconComponent = interest.icon;
                       const isSelected = selectedInterests.includes(
                         interest.id
@@ -372,8 +455,15 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }) => {
                           type="button"
                           className={`${styles.interestButton} ${
                             isSelected ? styles.interestButtonSelected : ""
+                          } ${
+                            selectedInterests.length >= 4 && !isSelected
+                              ? styles.interestButtonDisabled
+                              : ""
                           }`}
                           onClick={() => handleInterestToggle(interest.id)}
+                          disabled={
+                            selectedInterests.length >= 4 && !isSelected
+                          }
                         >
                           <IconComponent className={styles.interestIcon} />
                           <span className={styles.interestText}>
@@ -388,24 +478,17 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }) => {
                       );
                     })}
                   </div>
-                  <input
-                    type="hidden"
-                    {...formRegister("interests", {
-                      required: "Please select at least one interest",
-                      validate: (value) =>
-                        (value && value.length > 0) ||
-                        "Please select at least one interest",
-                    })}
-                  />
-                  {errors.interests && (
+                  {/* Remove the hidden input validation and handle it manually */}
+                  {selectedInterests.length === 0 && (
                     <span className={styles.error}>
-                      {errors.interests.message}
+                      Please select at least one interest
                     </span>
                   )}
                 </div>
 
+                {/* Profile Photo - Optional */}
                 <div className={styles.inputGroup}>
-                  <label className={styles.label}>Profile Photo *</label>
+                  <label className={styles.label}>Profile Photo</label>
                   <div className={styles.photoUploadContainer}>
                     <input
                       type="file"
@@ -413,48 +496,48 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }) => {
                       onChange={handlePhotoUpload}
                       accept="image/jpeg,image/jpg,image/png,image/webp"
                       className={styles.fileInput}
-                      {...formRegister("profilePhoto", {
-                        required: "Profile photo is required",
-                        validate: (value) =>
-                          value || profilePhoto || "Profile photo is required",
-                      })}
                     />
 
                     {photoPreview ? (
-                      <div className={styles.photoPreview}>
+                      <div className={styles.photoPreviewCircle}>
                         <img
                           src={photoPreview}
                           alt="Profile preview"
-                          className={styles.previewImage}
+                          className={styles.previewImageCircle}
                         />
                         <button
                           type="button"
                           onClick={removePhoto}
-                          className={styles.removePhotoBtn}
+                          className={styles.removePhotoBtnCircle}
                         >
-                          <X size={16} />
+                          <X size={14} />
                         </button>
+                        <div className={styles.photoOverlay}>
+                          <Camera className={styles.photoOverlayIcon} />
+                          <span>Change Photo</span>
+                        </div>
                       </div>
                     ) : (
                       <div
-                        className={styles.uploadArea}
+                        className={styles.uploadAreaCircle}
                         onClick={triggerFileInput}
                       >
-                        <Camera className={styles.uploadIcon} />
-                        <span className={styles.uploadText}>
-                          Upload Profile Photo
-                        </span>
-                        <span className={styles.uploadSubtext}>
-                          JPEG, PNG, WebP (max 5MB)
-                        </span>
+                        <div className={styles.uploadCircleContent}>
+                          <User className={styles.uploadIconCircle} />
+                          <span className={styles.uploadTextCircle}>
+                            Add Profile Photo
+                          </span>
+                          <span className={styles.uploadSubtextCircle}>
+                            Optional
+                          </span>
+                        </div>
                       </div>
                     )}
                   </div>
-                  {errors.profilePhoto && (
-                    <span className={styles.error}>
-                      {errors.profilePhoto.message}
-                    </span>
-                  )}
+                  <div className={styles.helperText}>
+                    Add a photo to increase your matches (JPEG, PNG, WebP, max
+                    5MB)
+                  </div>
                 </div>
 
                 <div className={styles.inputGroup}>
@@ -479,7 +562,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = "login" }) => {
                     })}
                   />
                   <div className={styles.charCount}>
-                    {watch("bio")?.length || 0}/500
+                    {watchBio?.length || 0}/500
                   </div>
                   {errors.bio && (
                     <span className={styles.error}>{errors.bio.message}</span>

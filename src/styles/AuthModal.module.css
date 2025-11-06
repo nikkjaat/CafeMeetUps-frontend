@@ -96,6 +96,33 @@
   padding: 0 0.5rem;
 }
 
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 1.5rem 0;
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+  z-index: 0;
+}
+
+.divider span {
+  background: white;
+  padding: 0 1rem;
+  position: relative;
+  z-index: 1;
+}
+
 .form {
   display: flex;
   flex-direction: column;
@@ -695,4 +722,382 @@
 .modal > * {
   max-width: 100%;
   word-wrap: break-word;
+}
+
+/* Circular Photo Upload Styles */
+.photoUploadContainer {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadAreaCircle {
+  width: 120px;
+  height: 120px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #fafafa;
+  position: relative;
+  overflow: hidden;
+}
+
+.uploadAreaCircle:hover {
+  border-color: #8b5cf6;
+  background: #faf5ff;
+  transform: scale(1.05);
+}
+
+.uploadCircleContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.uploadIconCircle {
+  width: 2rem;
+  height: 2rem;
+  color: #94a3b8;
+}
+
+.uploadTextCircle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #374151;
+  line-height: 1.2;
+}
+
+.uploadSubtextCircle {
+  font-size: 0.625rem;
+  color: #64748b;
+}
+
+.photoPreviewCircle {
+  width: 120px;
+  height: 120px;
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.photoPreviewCircle:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.photoPreviewCircle:hover .photoOverlay {
+  opacity: 1;
+}
+
+.previewImageCircle {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.removePhotoBtnCircle {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+  z-index: 2;
+}
+
+.removePhotoBtnCircle:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
+.photoOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+}
+
+.photoOverlayIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.photoOverlay span {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Update for mobile screens */
+@media (max-width: 768px) {
+  .photoPreviewCircle,
+  .uploadAreaCircle {
+    width: 100px;
+    height: 100px;
+  }
+
+  .uploadTextCircle {
+    font-size: 0.7rem;
+  }
+
+  .uploadSubtextCircle {
+    font-size: 0.6rem;
+  }
+
+  .uploadIconCircle {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .removePhotoBtnCircle {
+    width: 20px;
+    height: 20px;
+  }
+
+  .removePhotoBtnCircle svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* Enhanced focus states for accessibility */
+.uploadAreaCircle:focus-visible {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+.photoPreviewCircle:focus-visible {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+/* Social Auth Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.divider::before {
+  margin-right: 1rem;
+}
+
+.divider::after {
+  margin-left: 1rem;
+}
+
+/* Update existing styles for better mobile experience */
+@media (max-width: 768px) {
+  .photoPreviewCircle,
+  .uploadAreaCircle {
+    width: 100px;
+    height: 100px;
+  }
+
+  .uploadTextCircle {
+    font-size: 0.7rem;
+  }
+
+  .uploadSubtextCircle {
+    font-size: 0.6rem;
+  }
+
+  .uploadIconCircle {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+
+/* Enhanced focus states for accessibility */
+.uploadAreaCircle:focus-visible {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+.photoPreviewCircle:focus-visible {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+/* Loading animation for photo upload */
+@keyframes pulseUpload {
+  0%,
+  100% {
+    border-color: #cbd5e1;
+    background: #fafafa;
+  }
+  50% {
+    border-color: #8b5cf6;
+    background: #faf5ff;
+  }
+}
+
+.uploadAreaCircle.uploading {
+  animation: pulseUpload 1.5s ease-in-out infinite;
+}
+
+/* Add to AuthModal.module.css - Interest Grid Styles */
+.interestsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.interestButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.75rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  position: relative;
+  font-family: inherit;
+  outline: none;
+  width: 100%;
+}
+
+.interestButton:hover {
+  border-color: #ec4899;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.1);
+}
+
+.interestButtonSelected {
+  border-color: #ec4899;
+  background: linear-gradient(135deg, #fdf2f8, #fce7f3);
+  color: #db2777;
+}
+
+.interestButtonDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.interestButtonDisabled:hover {
+  transform: none;
+  border-color: #e5e7eb;
+  box-shadow: none;
+}
+
+.interestIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: currentColor;
+  flex-shrink: 0;
+}
+
+.interestText {
+  font-size: 0.875rem;
+  font-weight: 500;
+  flex: 1;
+  text-align: left;
+}
+
+.interestCheck {
+  width: 1.25rem;
+  height: 1.25rem;
+  background: #ec4899;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.interestsCount {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: normal;
+  margin-left: 0.5rem;
+}
+
+/* Tablet and Desktop Styles for Interest Grid in Auth Modal */
+@media (min-width: 768px) {
+  .interestsGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .interestButton {
+    padding: 1rem;
+  }
+
+  .interestText {
+    font-size: 0.9rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .interestsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Mobile optimization for interest buttons in Auth Modal */
+@media (max-width: 480px) {
+  .interestsGrid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .interestButton {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .interestText {
+    font-size: 0.8rem;
+  }
 }

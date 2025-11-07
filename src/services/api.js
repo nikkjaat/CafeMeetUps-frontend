@@ -90,10 +90,10 @@ class ApiService {
     });
   }
 
-  async facebookAuth(accessToken) {
+  async facebookAuth(tokenId) {
     return this.request("/auth/facebook", {
       method: "POST",
-      body: JSON.stringify({ accessToken }),
+      body: JSON.stringify({ tokenId }),
     });
   }
 

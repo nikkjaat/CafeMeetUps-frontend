@@ -1,10 +1,18 @@
-import { useState, useRef, useEffect } from 'react';
-import { Heart, MessageCircle, User, LogOut, Settings, ChevronDown } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import styles from '../styles/UserMenu.module.css';
+import { useState, useRef, useEffect } from "react";
+import {
+  Heart,
+  MessageCircle,
+  User,
+  LogOut,
+  Settings,
+  ChevronDown,
+} from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import styles from "../styles/UserMenu.module.css";
 
 const UserMenu = ({ className, navigate }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
   const { user, logout } = useAuth();
   const dropdownRef = useRef(null);
 
@@ -15,8 +23,20 @@ const UserMenu = ({ className, navigate }) => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    const handleResize = () => {
+      setIsSmallScreen(window.innerWidth <= 950.5);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("resize", handleResize);
+
+    // Initial check
+    handleResize();
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   const handleNavigation = (page) => {
@@ -26,24 +46,24 @@ const UserMenu = ({ className, navigate }) => {
 
   const handleLogout = () => {
     logout();
-    navigate('home');
+    navigate("home");
     setIsDropdownOpen(false);
   };
 
   return (
-    <div className={`${styles.userMenu} ${className || ''}`} ref={dropdownRef}>
+    <div className={`${styles.userMenu} ${className || ""}`} ref={dropdownRef}>
       {/* Quick Action Buttons */}
       <div className={styles.quickActions}>
-        <button 
+        <button
           className={styles.actionBtn}
-          onClick={() => handleNavigation('swipe')}
+          onClick={() => handleNavigation("swipe")}
           title="Discover"
         >
           <Heart />
         </button>
-        <button 
+        <button
           className={styles.actionBtn}
-          onClick={() => handleNavigation('matches')}
+          onClick={() => handleNavigation("matches")}
           title="Matches"
         >
           <MessageCircle />
@@ -53,15 +73,32 @@ const UserMenu = ({ className, navigate }) => {
       {/* User Avatar Dropdown */}
       <div className={styles.userDropdown}>
         <button
-          className={styles.userButton}
+          className={`${styles.userButton} ${
+            isSmallScreen ? styles.compact : ""
+          }`}
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           aria-expanded={isDropdownOpen}
         >
           <div className={styles.userAvatar}>
             <img src={user?.avatar} alt={user?.name} />
           </div>
-          <span className={styles.userName}>{user?.name}</span>
-          <ChevronDown className={`${styles.chevron} ${isDropdownOpen ? styles.rotated : ''}`} />
+          {!isSmallScreen && (
+            <>
+              <span className={styles.userName}>{user?.name}</span>
+              <ChevronDown
+                className={`${styles.chevron} ${
+                  isDropdownOpen ? styles.rotated : ""
+                }`}
+              />
+            </>
+          )}
+          {isSmallScreen && (
+            <ChevronDown
+              className={`${styles.chevron} ${
+                isSmallScreen ? styles.compactChevron : ""
+              } ${isDropdownOpen ? styles.rotated : ""}`}
+            />
+          )}
         </button>
 
         {isDropdownOpen && (
@@ -75,41 +112,41 @@ const UserMenu = ({ className, navigate }) => {
                 <div className={styles.userEmail}>{user?.email}</div>
               </div>
             </div>
-            
+
             <div className={styles.menuDivider}></div>
-            
-            <button 
+
+            <button
               className={styles.menuItem}
-              onClick={() => handleNavigation('profile')}
+              onClick={() => handleNavigation("profile")}
             >
               <User />
               <span>My Profile</span>
             </button>
-            
-            <button 
+
+            <button
               className={styles.menuItem}
-              onClick={() => handleNavigation('swipe')}
+              onClick={() => handleNavigation("swipe")}
             >
               <Heart />
               <span>Discover</span>
             </button>
-            
-            <button 
+
+            <button
               className={styles.menuItem}
-              onClick={() => handleNavigation('matches')}
+              onClick={() => handleNavigation("matches")}
             >
               <MessageCircle />
               <span>My Matches</span>
             </button>
-            
+
             <button className={styles.menuItem}>
               <Settings />
               <span>Settings</span>
             </button>
-            
+
             <div className={styles.menuDivider}></div>
-            
-            <button 
+
+            <button
               className={`${styles.menuItem} ${styles.logoutItem}`}
               onClick={handleLogout}
             >

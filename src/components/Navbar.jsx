@@ -1,17 +1,18 @@
-import { useState, useEffect } from 'react';
-import { Heart, Menu, X } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import AuthModal from './AuthModal';
-import NavLinks from './NavLinks';
-import UserMenu from './UserMenu';
-import MobileMenu from './MobileMenu';
-import styles from '../styles/Navbar.module.css';
+import { useState, useEffect } from "react";
+import { Heart, Menu, X } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import AuthModal from "./AuthModal";
+import NavLinks from "./NavLinks";
+import UserMenu from "./UserMenu";
+import MobileMenu from "./MobileMenu";
+import styles from "../styles/Navbar.module.css";
 
 const Navbar = ({ currentPage, navigate, activeSection }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState('login');
+  const [authMode, setAuthMode] = useState("login");
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMediumScreen, setIsMediumScreen] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -19,18 +20,32 @@ const Navbar = ({ currentPage, navigate, activeSection }) => {
       setIsScrolled(window.scrollY > 50);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const handleResize = () => {
+      setIsMediumScreen(
+        window.innerWidth <= 1150.5 && window.innerWidth >= 768
+      );
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("resize", handleResize);
+
+    // Initial check
+    handleResize();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   const handleSignIn = () => {
-    setAuthMode('login');
+    setAuthMode("login");
     setShowAuthModal(true);
     setIsMenuOpen(false);
   };
 
   const handleGetStarted = () => {
-    setAuthMode('register');
+    setAuthMode("register");
     setShowAuthModal(true);
     setIsMenuOpen(false);
   };
@@ -40,13 +55,13 @@ const Navbar = ({ currentPage, navigate, activeSection }) => {
   };
 
   const handleLogoClick = () => {
-    navigate('home');
+    navigate("home");
     setIsMenuOpen(false);
   };
 
   return (
     <>
-      <nav className={`${styles.navbar} ${isScrolled ? styles.scrolled : ''}`}>
+      <nav className={`${styles.navbar} ${isScrolled ? styles.scrolled : ""}`}>
         <div className={styles.container}>
           <div className={styles.navContent}>
             {/* Logo */}
@@ -54,13 +69,17 @@ const Navbar = ({ currentPage, navigate, activeSection }) => {
               <div className={styles.logoIcon}>
                 <Heart />
               </div>
-              <span className={styles.logoText}>
-                LoveConnect
-              </span>
+              <span className={styles.logoText}>LoveConnect</span>
             </div>
 
             {/* Desktop Navigation */}
-            <NavLinks className={styles.desktopNav} navigate={navigate} currentPage={currentPage} activeSection={activeSection} />
+            <NavLinks
+              className={styles.desktopNav}
+              navigate={navigate}
+              currentPage={currentPage}
+              activeSection={activeSection}
+              isMediumScreen={isMediumScreen}
+            />
 
             {/* User Menu or Auth Buttons */}
             {user ? (
@@ -70,7 +89,10 @@ const Navbar = ({ currentPage, navigate, activeSection }) => {
                 <button className={styles.signInBtn} onClick={handleSignIn}>
                   Sign In
                 </button>
-                <button className={styles.getStartedBtn} onClick={handleGetStarted}>
+                <button
+                  className={styles.getStartedBtn}
+                  onClick={handleGetStarted}
+                >
                   Get Started
                 </button>
               </div>
@@ -87,7 +109,7 @@ const Navbar = ({ currentPage, navigate, activeSection }) => {
           </div>
         </div>
 
-        <MobileMenu 
+        <MobileMenu
           isOpen={isMenuOpen}
           onClose={closeMobileMenu}
           navigate={navigate}

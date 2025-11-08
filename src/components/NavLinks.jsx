@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  Hop as Home,
+  Home as Home,
   Grid3x2 as Grid3X3,
   Circle as HelpCircle,
   Users,
@@ -10,7 +10,12 @@ import {
 } from "lucide-react";
 import styles from "../styles/NavLinks.module.css";
 
-const NavLinks = ({ className, isMobile = false, onClose }) => {
+const NavLinks = ({
+  className,
+  isMobile = false,
+  onClose,
+  isMediumScreen = false,
+}) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -61,7 +66,36 @@ const NavLinks = ({ className, isMobile = false, onClose }) => {
     );
   }
 
-  // For desktop, use Link components for better accessibility and performance
+  // For desktop with icons only (medium screens)
+  if (isMediumScreen) {
+    return (
+      <div
+        className={`${styles.navLinks} ${styles.mediumScreenNav} ${
+          className || ""
+        }`}
+      >
+        {navItems.map((item) => {
+          const IconComponent = item.icon;
+          const active = isActive(item.path);
+
+          return (
+            <Link
+              key={item.name}
+              to={item.path}
+              className={`${styles.navLink} ${styles.iconNavLink} ${
+                active ? styles.active : ""
+              }`}
+              title={item.name}
+            >
+              <IconComponent />
+            </Link>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // For desktop with text (large screens)
   return (
     <div className={`${styles.navLinks} ${className || ""}`}>
       {navItems.map((item) => {

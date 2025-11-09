@@ -6,6 +6,8 @@ import {
   LogOut,
   Settings,
   ChevronDown,
+  AlertCircle,
+  BellIcon,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import styles from "../styles/UserMenu.module.css";
@@ -59,7 +61,7 @@ const UserMenu = ({ className, navigate }) => {
           onClick={() => handleNavigation("swipe")}
           title="Discover"
         >
-          <Heart />
+          <BellIcon />
         </button>
         <button
           className={styles.actionBtn}

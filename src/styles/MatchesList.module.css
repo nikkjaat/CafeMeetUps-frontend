@@ -161,7 +161,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -584,38 +585,38 @@
   .sidebar {
     width: 18rem;
   }
-  
+
   .title {
     padding: 1.25rem;
     font-size: 1.125rem;
   }
-  
+
   .matchItem {
     padding: 0.875rem 1.25rem;
   }
-  
+
   .matchAvatar {
     width: 3rem;
     height: 3rem;
   }
-  
+
   .chatHeader {
     padding: 1.25rem;
   }
-  
+
   .chatAvatar {
     width: 3rem;
     height: 3rem;
   }
-  
+
   .messages {
     padding: 1.25rem;
   }
-  
+
   .messageForm {
     padding: 1.25rem;
   }
-  
+
   .sendBtn {
     width: 3rem;
     height: 3rem;
@@ -628,7 +629,7 @@
     position: relative;
     height: 100vh;
   }
-  
+
   .sidebar {
     position: absolute;
     top: 0;
@@ -639,112 +640,112 @@
     z-index: 20;
     transition: transform 0.3s ease;
   }
-  
+
   .sidebar.hidden {
     transform: translateX(-100%);
   }
-  
+
   .chatArea {
     width: 100%;
     height: 100%;
   }
-  
+
   .backBtn {
     display: flex;
   }
-  
+
   .title {
     padding: 1rem;
     font-size: 1rem;
   }
-  
+
   .matchItem {
     padding: 0.75rem 1rem;
   }
-  
+
   .matchAvatar {
     width: 2.5rem;
     height: 2.5rem;
   }
-  
+
   .matchInfo h3 {
     font-size: 0.9rem;
   }
-  
+
   .lastMessage {
     font-size: 0.8rem;
   }
-  
+
   .chatHeader {
     padding: 1rem;
     gap: 0.75rem;
   }
-  
+
   .chatAvatar {
     width: 2.5rem;
     height: 2.5rem;
   }
-  
+
   .chatInfo h3 {
     font-size: 1rem;
   }
-  
+
   .messages {
     padding: 1rem;
     gap: 0.75rem;
   }
-  
+
   .message {
     max-width: 85%;
   }
-  
+
   .messageContent {
     padding: 0.75rem 1rem;
     font-size: 0.9rem;
   }
-  
+
   .messageForm {
     padding: 1rem;
     gap: 0.75rem;
   }
-  
+
   .messageInput {
     padding: 0.75rem 1rem;
     font-size: 0.9rem;
   }
-  
+
   .sendBtn {
     width: 2.75rem;
     height: 2.75rem;
   }
-  
+
   .sendBtn svg {
     width: 1.25rem;
     height: 1.25rem;
   }
-  
+
   .selectMatch svg {
     width: 3rem;
     height: 3rem;
   }
-  
+
   .selectMatch h3 {
     font-size: 1.25rem;
   }
-  
+
   .selectMatch p {
     font-size: 0.9rem;
   }
-  
+
   .noMessages svg {
     width: 3rem;
     height: 3rem;
   }
-  
+
   .chatActions {
     display: none;
   }
-  
+
   .messageStarters {
     max-width: 100%;
   }
@@ -755,35 +756,133 @@
   .sidebar {
     width: 100%;
   }
-  
+
   .title {
     padding: 0.75rem;
     font-size: 0.9rem;
   }
-  
+
   .matchItem {
     padding: 0.5rem 0.75rem;
   }
-  
+
   .matchAvatar {
     width: 2rem;
     height: 2rem;
   }
-  
+
   .chatHeader {
     padding: 0.75rem;
   }
-  
+
   .chatAvatar {
     width: 2rem;
     height: 2rem;
   }
-  
+
   .messages {
     padding: 0.75rem;
   }
-  
+
   .messageForm {
     padding: 0.75rem;
+  }
+}
+
+/* Add these to your existing MatchesList.module.css */
+
+/* Sidebar Overlay for Mobile */
+.sidebarOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 15;
+  display: none;
+}
+
+/* Mobile Toggle Button */
+.mobileToggle {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 50;
+  background: linear-gradient(135deg, #ec4899, #ef4444);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 3rem;
+  height: 3rem;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.mobileToggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.mobileToggle svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Desktop behavior - sidebar always visible */
+@media (min-width: 769px) {
+  .sidebar {
+    transform: translateX(0) !important;
+  }
+
+  .backBtn {
+    display: none !important;
+  }
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .mobileToggle {
+    display: flex;
+  }
+
+  .sidebarOverlay {
+    display: block;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 85%;
+    max-width: 300px;
+    height: 100%;
+    z-index: 20;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .sidebar:not(.hidden) {
+    transform: translateX(0);
+  }
+
+  .backBtn {
+    display: flex;
+  }
+
+  .container {
+    padding-top: 0;
+  }
+}
+
+/* Ensure chat area takes full width on mobile when sidebar is hidden */
+@media (max-width: 768px) {
+  .chatArea {
+    width: 100%;
   }
 }

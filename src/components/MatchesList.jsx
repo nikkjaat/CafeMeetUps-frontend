@@ -1,30 +1,199 @@
-import { useState } from 'react';
-import { useMatch } from '../contexts/MatchContext';
-import { useAuth } from '../contexts/AuthContext';
-import { MessageCircle, Heart, Send, ArrowLeft, Phone, Video } from 'lucide-react';
-import styles from '../styles/MatchesList.module.css';
+import { useState, useEffect } from "react";
+import { useMatch } from "../contexts/MatchContext";
+import { useAuth } from "../contexts/AuthContext";
+import {
+  MessageCircle,
+  Heart,
+  Send,
+  ArrowLeft,
+  Phone,
+  Video,
+  Menu,
+} from "lucide-react";
+import styles from "../styles/MatchesList.module.css";
 
 const MatchesList = ({ navigate }) => {
   const { user } = useAuth();
-  const { matches, sendMessage } = useMatch();
+  const { matches, sendMessage, loadMatchMessages } = useMatch();
   const [selectedMatch, setSelectedMatch] = useState(null);
-  const [messageText, setMessageText] = useState('');
+  const [messageText, setMessageText] = useState("");
   const [showSidebar, setShowSidebar] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
-  const handleSendMessage = (e) => {
-    e.preventDefault();
-    if (messageText.trim() && selectedMatch) {
-      sendMessage(selectedMatch.id, messageText.trim());
-      setMessageText('');
+  // Check screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
+  console.log("🔍 Current matches:", matches);
+
+  // Auto-hide sidebar on mobile when match is selected
+  useEffect(() => {
+    if (isMobile && selectedMatch) {
+      setShowSidebar(false);
+    }
+  }, [selectedMatch, isMobile]);
+
+  // Handle match click
+  const handleMatchClick = (match) => {
+    console.log("🖱️ Match clicked - Full object:", match);
+
+    // The match ID is the _id field from MongoDB
+    const matchId = match._id;
+    console.log("🖱️ Match ID to use:", matchId);
+
+    if (!matchId) {
+      console.error("❌ No _id found in match object");
+      return;
+    }
+
+    setSelectedMatch(match);
+    if (isMobile) {
+      setShowSidebar(false);
     }
   };
+
+  // Load messages when a match is selected
+  useEffect(() => {
+    if (selectedMatch) {
+      const loadMessages = async () => {
+        try {
+          // Use _id as the match ID (this is the correct MongoDB document ID)
+          const matchId = selectedMatch._id;
+          console.log("🔄 Loading messages for match ID:", matchId);
+
+          if (!matchId) {
+            console.error("❌ No _id found in selectedMatch");
+            return;
+          }
+
+          await loadMatchMessages(matchId);
+        } catch (error) {
+          console.error("❌ Error loading messages:", error);
+          alert("Failed to load messages. Please try again.");
+        }
+      };
+      loadMessages();
+    }
+  }, [selectedMatch, loadMatchMessages]);
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (messageText.trim() && selectedMatch) {
+      try {
+        const matchId = selectedMatch._id;
+        console.log("💬 Sending message to match ID:", matchId, messageText);
+
+        await sendMessage(matchId, messageText.trim());
+        setMessageText("");
+
+        // Refresh messages after sending
+        await loadMatchMessages(matchId);
+      } catch (error) {
+        console.error("❌ Error sending message:", error);
+        alert("Failed to send message. Please try again.");
+      }
+    }
+  };
+
+  // Safe match data access
+  const getMatchImage = (match) => {
+    // If match has user object with avatar
+    if (match.user && match.user.avatar) {
+      return match.user.avatar;
+    }
+
+    // If match has users array with populated user objects
+    if (match.users && match.users.length === 2 && Array.isArray(match.users)) {
+      const otherUser = match.users.find(
+        (u) => u._id && u._id.toString() !== user.id
+      );
+      if (otherUser && otherUser.avatar) {
+        return otherUser.avatar;
+      }
+    }
+
+    // Fallback images
+    return (
+      match.avatar ||
+      match.images?.[0] ||
+      match.profile?.images?.[0] ||
+      match.profile?.avatar ||
+      "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg"
+    );
+  };
+
+  const getMatchName = (match) => {
+    // If match has user object with name
+    if (match.user && match.user.name) {
+      return match.user.name;
+    }
+
+    // If match has users array with populated user objects
+    if (match.users && match.users.length === 2 && Array.isArray(match.users)) {
+      const otherUser = match.users.find(
+        (u) => u._id && u._id.toString() !== user.id
+      );
+      if (otherUser && otherUser.name) {
+        return otherUser.name;
+      }
+    }
+
+    // Fallback names
+    return match.name || match.profile?.name || "Unknown User";
+  };
+
+  const getMatchMessages = (match) => {
+    return match.messages || [];
+  };
+
+  const getMatchDate = (match) => {
+    return match.matchedAt || match.createdAt || new Date().toISOString();
+  };
+
+  const getLastMessagePreview = (match) => {
+    const messages = getMatchMessages(match);
+    if (messages.length === 0) {
+      return "Say hello!";
+    }
+
+    const lastMessage = messages[messages.length - 1];
+    const prefix = lastMessage.sender === "user" ? "You: " : "";
+    return `${prefix}${lastMessage.text}`;
+  };
+
+  const toggleSidebar = () => {
+    setShowSidebar(!showSidebar);
+  };
+
+  // Temporary debug - log matches structure
+  useEffect(() => {
+    console.log("🔍 MATCHES STRUCTURE ANALYSIS:");
+    matches.forEach((match, index) => {
+      console.log(`Match ${index + 1}:`, {
+        _id: match._id,
+        matchId: match.matchId,
+        id: match.id,
+        users: match.users,
+        user: match.user,
+        hasMessages: !!(match.messages && match.messages.length > 0),
+      });
+    });
+  }, [matches]);
 
   if (!user) {
     return (
       <div className={styles.container}>
         <div className={styles.loginPrompt}>
           <h2>Please log in to view your matches</h2>
-          <button onClick={() => navigate('home')}>Go to Home</button>
+          <button onClick={() => navigate("home")}>Go to Home</button>
         </div>
       </div>
     );
@@ -32,58 +201,84 @@ const MatchesList = ({ navigate }) => {
 
   return (
     <div className={styles.container}>
-      <div className={`${styles.sidebar} ${!showSidebar ? styles.hidden : ''}`}>
+      {/* Mobile Toggle Button */}
+      {isMobile && (
+        <button className={styles.mobileToggle} onClick={toggleSidebar}>
+          <Menu />
+        </button>
+      )}
+
+      {/* Sidebar Overlay for Mobile */}
+      {isMobile && showSidebar && (
+        <div
+          className={styles.sidebarOverlay}
+          onClick={() => setShowSidebar(false)}
+        />
+      )}
+
+      <div className={`${styles.sidebar} ${!showSidebar ? styles.hidden : ""}`}>
         <h2 className={styles.title}>
           <Heart />
           Your Matches ({matches.length})
         </h2>
-        
+
         <div className={styles.matchesList}>
           {matches.length === 0 ? (
             <div className={styles.noMatches}>
               <div className={styles.noMatchesIcon}>💔</div>
               <p>No matches yet!</p>
-              <p>Keep swiping to find your perfect match. The more you swipe, the better your chances!</p>
-              <button 
+              <p>
+                Keep swiping to find your perfect match. The more you swipe, the
+                better your chances!
+              </p>
+              <button
                 className={styles.swipeBtn}
-                onClick={() => navigate('swipe')}
+                onClick={() => navigate("swipe")}
               >
                 Start Swiping
               </button>
             </div>
           ) : (
-            matches.map((match) => (
-              <div
-                key={match.id}
-                className={`${styles.matchItem} ${selectedMatch?.id === match.id ? styles.active : ''}`}
-                onClick={() => {
-                  setSelectedMatch(match);
-                  setShowSidebar(false); // Hide sidebar on mobile when selecting a match
-                }}
-              >
-                <div className={styles.matchAvatar}>
-                  <img
-                    src={match.profile.images[0]}
-                    alt={match.profile.name}
-                  />
+            matches.map((match) => {
+              const matchImage = getMatchImage(match);
+              const matchName = getMatchName(match);
+              const lastMessagePreview = getLastMessagePreview(match);
+              const messages = getMatchMessages(match);
+              const hasUnread = messages.some(
+                (msg) => msg.sender === "match" && !msg.isRead
+              );
+
+              return (
+                <div
+                  key={match._id} // Use _id as the primary key
+                  className={`${styles.matchItem} ${
+                    selectedMatch?._id === match._id ? styles.active : ""
+                  }`}
+                  onClick={() => handleMatchClick(match)}
+                >
+                  <div className={styles.matchAvatar}>
+                    <img
+                      src={matchImage}
+                      alt={matchName}
+                      onError={(e) => {
+                        e.target.src =
+                          "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg";
+                      }}
+                    />
+                    {hasUnread && (
+                      <div className={styles.unreadIndicator}></div>
+                    )}
+                  </div>
+                  <div className={styles.matchInfo}>
+                    <h3>{matchName}</h3>
+                    <p className={styles.lastMessage}>{lastMessagePreview}</p>
+                  </div>
+                  {messages.length === 0 && (
+                    <div className={styles.newMatch}>New</div>
+                  )}
                 </div>
-                <div className={styles.matchInfo}>
-                  <h3>{match.profile.name}</h3>
-                  <p className={styles.lastMessage}>
-                    {match.messages.length > 0 
-                      ? `${match.messages[match.messages.length - 1].sender === 'user' ? 'You: ' : ''}${match.messages[match.messages.length - 1].text}`
-                      : 'Say hello!'
-                    }
-                  </p>
-                </div>
-                {match.messages.length === 0 && (
-                  <div className={styles.newMatch}>New</div>
-                )}
-                {match.messages.length > 0 && match.messages[match.messages.length - 1].sender === 'match' && (
-                  <div className={styles.unreadIndicator}></div>
-                )}
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>
@@ -92,71 +287,100 @@ const MatchesList = ({ navigate }) => {
         {selectedMatch ? (
           <>
             <div className={styles.chatHeader}>
-              <button 
-                className={styles.backBtn}
-                onClick={() => setShowSidebar(true)}
-              >
-                <ArrowLeft />
-              </button>
+              {isMobile && (
+                <button
+                  className={styles.backBtn}
+                  onClick={() => setShowSidebar(true)}
+                >
+                  <ArrowLeft />
+                </button>
+              )}
               <div className={styles.chatAvatar}>
                 <img
-                  src={selectedMatch.profile.images[0]}
-                  alt={selectedMatch.profile.name}
+                  src={getMatchImage(selectedMatch)}
+                  alt={getMatchName(selectedMatch)}
+                  onError={(e) => {
+                    e.target.src =
+                      "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg";
+                  }}
                 />
                 <div className={styles.onlineIndicator}></div>
               </div>
               <div className={styles.chatInfo}>
-                <h3>{selectedMatch.profile.name}</h3>
-                <p>Active now • Matched {new Date(selectedMatch.matchedAt).toLocaleDateString()}</p>
+                <h3>{getMatchName(selectedMatch)}</h3>
+                <p>
+                  Active now • Matched{" "}
+                  {new Date(getMatchDate(selectedMatch)).toLocaleDateString()}
+                </p>
               </div>
               <div className={styles.chatActions}>
-                <button className={styles.callBtn}><Phone /></button>
-                <button className={styles.videoBtn}><Video /></button>
+                <button className={styles.callBtn}>
+                  <Phone />
+                </button>
+                <button className={styles.videoBtn}>
+                  <Video />
+                </button>
               </div>
             </div>
 
             <div className={styles.messages}>
-              {selectedMatch.messages.length === 0 ? (
+              {getMatchMessages(selectedMatch).length === 0 ? (
                 <div className={styles.noMessages}>
                   <Heart />
-                  <h3>You matched with {selectedMatch.profile.name}!</h3>
-                  <p>Start the conversation with a friendly message. Here are some ideas:</p>
+                  <h3>You matched with {getMatchName(selectedMatch)}!</h3>
+                  <p>
+                    Start the conversation with a friendly message. Here are
+                    some ideas:
+                  </p>
                   <div className={styles.messageStarters}>
-                    <button 
+                    <button
+                      type="button"
                       className={styles.starterBtn}
-                      onClick={() => setMessageText("Hey! How's your day going? 😊")}
+                      onClick={() =>
+                        setMessageText("Hey! How's your day going? 😊")
+                      }
                     >
                       "Hey! How's your day going? 😊"
                     </button>
-                    <button 
+                    <button
+                      type="button"
                       className={styles.starterBtn}
-                      onClick={() => setMessageText("I love your profile! What's your favorite hobby?")}
+                      onClick={() =>
+                        setMessageText(
+                          "I love your profile! What's your favorite hobby?"
+                        )
+                      }
                     >
                       "I love your profile! What's your favorite hobby?"
                     </button>
-                    <button 
+                    <button
+                      type="button"
                       className={styles.starterBtn}
-                      onClick={() => setMessageText("Nice to match with you! Tell me something interesting about yourself.")}
+                      onClick={() =>
+                        setMessageText(
+                          "Nice to match with you! Tell me something interesting about yourself."
+                        )
+                      }
                     >
                       "Tell me something interesting about yourself."
                     </button>
                   </div>
                 </div>
               ) : (
-                selectedMatch.messages.map((message) => (
+                getMatchMessages(selectedMatch).map((message, index) => (
                   <div
-                    key={message.id}
+                    key={message.id || `msg-${index}`}
                     className={`${styles.message} ${
-                      message.sender === 'user' ? styles.sent : styles.received
+                      message.sender === "user" ? styles.sent : styles.received
                     }`}
                   >
-                    <div className={styles.messageContent}>
-                      {message.text}
-                    </div>
+                    <div className={styles.messageContent}>{message.text}</div>
                     <div className={styles.messageTime}>
-                      {new Date(message.timestamp).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit'
+                      {new Date(
+                        message.timestamp || new Date()
+                      ).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
                       })}
                     </div>
                   </div>
@@ -169,7 +393,7 @@ const MatchesList = ({ navigate }) => {
                 type="text"
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
-                placeholder={`Message ${selectedMatch.profile.name}...`}
+                placeholder={`Message ${getMatchName(selectedMatch)}...`}
                 className={styles.messageInput}
               />
               <button
@@ -185,11 +409,15 @@ const MatchesList = ({ navigate }) => {
           <div className={styles.selectMatch}>
             <MessageCircle />
             <h3>Welcome to your matches!</h3>
-            <p>Select a match from the sidebar to start chatting and build meaningful connections.</p>
+            <p>
+              {matches.length === 0
+                ? "Start swiping to find your perfect match and build meaningful connections."
+                : "Select a match from the sidebar to start chatting."}
+            </p>
             {matches.length === 0 && (
-              <button 
+              <button
                 className={styles.startSwipingBtn}
-                onClick={() => navigate('swipe')}
+                onClick={() => navigate("swipe")}
               >
                 Start Swiping to Get Matches
               </button>

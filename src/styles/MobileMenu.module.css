@@ -484,8 +484,8 @@
   }
 
   .floatingCloseButton {
-    right: calc(5% + 1rem);
-    bottom: 2rem;
+    right: 0;
+    bottom: 10rem;
   }
 
   .header {

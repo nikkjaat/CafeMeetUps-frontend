@@ -483,7 +483,7 @@
 /* For very small screens, adjust spacing */
 @media (max-width: 480px) {
   .floatingActionsContainer {
-    top: 0.75rem;
+    bottom: 8rem;
     right: 0.75rem;
   }
 

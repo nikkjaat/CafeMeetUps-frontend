@@ -1,6 +1,6 @@
 // Navbar.js - Updated
 import { useState, useEffect } from "react";
-import { Heart, Menu, X } from "lucide-react";
+import { Heart, Menu, X, User } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import AuthModal from "./AuthModal";
 import NavLinks from "./NavLinks";
@@ -87,24 +87,39 @@ const Navbar = ({ currentPage, navigate, activeSection }) => {
             {user ? (
               <UserMenu className={styles.userMenu} navigate={navigate} />
             ) : (
-              <div className={styles.authButtons}>
-                <button className={styles.signInBtn} onClick={handleSignIn}>
-                  Sign In
-                </button>
-                <button
-                  className={styles.getStartedBtn}
-                  onClick={handleGetStarted}
-                >
-                  Get Started
-                </button>
-              </div>
+              <>
+                {/* Desktop Auth Buttons */}
+                <div className={styles.authButtons}>
+                  <button className={styles.signInBtn} onClick={handleSignIn}>
+                    Sign In
+                  </button>
+                  <button
+                    className={styles.getStartedBtn}
+                    onClick={handleGetStarted}
+                  >
+                    Get Started
+                  </button>
+                </div>
+
+                {/* Mobile User Icon for logged out users */}
+                {isMobileScreen && (
+                  <button
+                    className={styles.mobileUserIcon}
+                    onClick={handleSignIn}
+                    aria-label="Sign In"
+                    title="Sign In"
+                  >
+                    <User />
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>
       </nav>
 
-      {/* Floating Quick Actions for Mobile - Includes Menu Button */}
-      {user && isMobileScreen && (
+      {/* Floating Actions for Mobile - ALWAYS SHOW (Menu + Quick Actions) */}
+      {isMobileScreen && (
         <div className={styles.floatingActionsContainer}>
           {/* Close button when sidebar is open */}
           {isMenuOpen && (
@@ -117,7 +132,7 @@ const Navbar = ({ currentPage, navigate, activeSection }) => {
             </button>
           )}
 
-          {/* Menu button when sidebar is closed */}
+          {/* Menu button when sidebar is closed - ALWAYS SHOW */}
           {!isMenuOpen && (
             <button
               className={`${styles.floatingActionBtn} ${styles.menuBtn}`}
@@ -128,11 +143,25 @@ const Navbar = ({ currentPage, navigate, activeSection }) => {
             </button>
           )}
 
-          {/* Quick Actions (Notification & Message) */}
-          <UserMenu.QuickActions
-            navigate={navigate}
-            className={styles.floatingQuickActions}
-          />
+          {/* Quick Actions (Notification & Message) - Only show when user is logged in */}
+          {user && (
+            <UserMenu.QuickActions
+              navigate={navigate}
+              className={styles.floatingQuickActions}
+            />
+          )}
+
+          {/* Sign In Button - Show when user is logged out */}
+          {!user && (
+            <button
+              className={`${styles.floatingActionBtn} ${styles.signInFloatingBtn}`}
+              onClick={handleSignIn}
+              aria-label="Sign In"
+              title="Sign In"
+            >
+              <User />
+            </button>
+          )}
         </div>
       )}
 

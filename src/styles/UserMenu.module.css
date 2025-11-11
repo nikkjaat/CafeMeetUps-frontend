@@ -31,8 +31,8 @@
 
 .notificationBadge {
   position: absolute;
-  top: -2px;
-  right: -2px;
+  top: 1px;
+  right: 2px;
   background: linear-gradient(135deg, #ef4444, #dc2626);
   color: white;
   border-radius: 50%;
@@ -672,8 +672,6 @@
       transform: translateY(0);
     }
   }
-
-
 
   @keyframes fadeIn {
     from {

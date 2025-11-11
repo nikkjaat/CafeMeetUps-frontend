@@ -109,6 +109,13 @@
   transform: translateY(-1px);
 }
 
+/* Hide logo text on very small screens */
+@media (max-width: 400px) {
+  .logoText {
+    display: none;
+  }
+}
+
 .desktopNav {
   display: none;
   align-items: center;
@@ -206,40 +213,177 @@
   left: 100%;
 }
 
+/* Remove mobile menu button from navbar */
 .mobileMenuBtn {
-  display: block;
-  color: #374151;
-  background: none;
-  border: none;
+  display: none;
+  width: 2rem;
+  height: 2rem;
+}
+
+/* UserMenu - ALWAYS SHOW on all screens */
+.userMenu {
+  display: flex;
+  align-items: center;
+}
+
+/* Floating Actions Container */
+.floatingActionsContainer {
+  position: fixed;
+  bottom: 2rem;
+  right: 1rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* Floating Action Button Base */
+.floatingActionBtn {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  color: white;
+  box-shadow: 0 8px 25px rgba(236, 72, 153, 0.4);
+  border: 2px solid white;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border-radius: 0.5rem;
-  padding: 0.5rem;
+  animation: slideInUp 0.3s ease-out;
 }
 
-@media (min-width: 768px) {
-  .mobileMenuBtn {
-    display: none;
-  }
+.floatingActionBtn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.5s ease;
 }
 
-.mobileMenuBtn:hover {
-  color: #ec4899;
-  background: linear-gradient(135deg, #fce7f3, #fdf2f8);
-  transform: scale(1.05);
+.floatingActionBtn:hover {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 12px 35px rgba(236, 72, 153, 0.5);
 }
 
-.mobileMenuBtn svg {
+.floatingActionBtn:hover::before {
+  left: 100%;
+}
+
+.floatingActionBtn svg {
   width: 1.5rem;
   height: 1.5rem;
 }
 
-.userMenu {
-  display: none;
+/* Menu Button */
+.menuBtn {
+  background: linear-gradient(135deg, #fce7f3, #fdf2f8);
+  color: #ec4899;
 }
 
-@media (min-width: 768px) {
-  .userMenu {
-    display: flex;
+/* Close Button */
+.closeBtn {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+/* Quick Actions */
+.floatingQuickActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.floatingQuickActions .quickActions {
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.floatingQuickActions .actionBtn {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ec4899, #ef4444);
+  color: white;
+  box-shadow: 0 8px 25px rgba(236, 72, 153, 0.4);
+  border: 2px solid white;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.floatingQuickActions .actionBtn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.floatingQuickActions .actionBtn:hover {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 12px 35px rgba(236, 72, 153, 0.5);
+}
+
+.floatingQuickActions .actionBtn:hover::before {
+  left: 100%;
+}
+
+.floatingQuickActions .actionBtn svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.floatingQuickActions .notificationBadge {
+  top: 0;
+  right: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  font-size: 0.7rem;
+  border: 2px solid white;
+  animation: pulse 2s infinite;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Notification Popup adjustments for mobile */
+@media (max-width: 768px) {
+  .floatingQuickActions .notificationPopup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    max-width: 350px;
+    max-height: 70vh;
+    bottom: auto;
+    right: auto;
   }
 }

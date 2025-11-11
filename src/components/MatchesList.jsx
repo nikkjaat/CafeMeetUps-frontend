@@ -19,6 +19,7 @@ const MatchesList = ({ navigate }) => {
   const [messageText, setMessageText] = useState("");
   const [showSidebar, setShowSidebar] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [loadingMessages, setLoadingMessages] = useState(false);
 
   // Check screen size
   useEffect(() => {
@@ -42,15 +43,15 @@ const MatchesList = ({ navigate }) => {
   }, [selectedMatch, isMobile]);
 
   // Handle match click
-  const handleMatchClick = (match) => {
+  const handleMatchClick = async (match) => {
     console.log("🖱️ Match clicked - Full object:", match);
 
-    // The match ID is the _id field from MongoDB
-    const matchId = match._id;
+    // Use _id as the primary identifier
+    const matchId = match._id || match.matchId || match.id;
     console.log("🖱️ Match ID to use:", matchId);
 
     if (!matchId) {
-      console.error("❌ No _id found in match object");
+      console.error("❌ No match ID found in match object");
       return;
     }
 
@@ -58,44 +59,48 @@ const MatchesList = ({ navigate }) => {
     if (isMobile) {
       setShowSidebar(false);
     }
+
+    // Load messages immediately
+    await loadMessagesForMatch(matchId);
   };
 
-  // Load messages when a match is selected
-  useEffect(() => {
-    if (selectedMatch) {
-      const loadMessages = async () => {
-        try {
-          // Use _id as the match ID (this is the correct MongoDB document ID)
-          const matchId = selectedMatch._id;
-          console.log("🔄 Loading messages for match ID:", matchId);
+  // Load messages for a specific match
+  const loadMessagesForMatch = async (matchId) => {
+    setLoadingMessages(true);
+    try {
+      console.log("🔄 Loading messages for match ID:", matchId);
+      const messages = await loadMatchMessages(matchId);
+      console.log("✅ Messages loaded:", messages);
 
-          if (!matchId) {
-            console.error("❌ No _id found in selectedMatch");
-            return;
-          }
-
-          await loadMatchMessages(matchId);
-        } catch (error) {
-          console.error("❌ Error loading messages:", error);
-          alert("Failed to load messages. Please try again.");
+      // Update selected match with loaded messages
+      setSelectedMatch((prev) => {
+        if (prev && (prev._id === matchId || prev.matchId === matchId)) {
+          return {
+            ...prev,
+            messages: messages || [],
+          };
         }
-      };
-      loadMessages();
+        return prev;
+      });
+    } catch (error) {
+      console.error("❌ Error loading messages:", error);
+    } finally {
+      setLoadingMessages(false);
     }
-  }, [selectedMatch, loadMatchMessages]);
+  };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (messageText.trim() && selectedMatch) {
       try {
-        const matchId = selectedMatch._id;
+        const matchId = selectedMatch._id || selectedMatch.matchId;
         console.log("💬 Sending message to match ID:", matchId, messageText);
 
         await sendMessage(matchId, messageText.trim());
         setMessageText("");
 
         // Refresh messages after sending
-        await loadMatchMessages(matchId);
+        await loadMessagesForMatch(matchId);
       } catch (error) {
         console.error("❌ Error sending message:", error);
         alert("Failed to send message. Please try again.");
@@ -105,6 +110,9 @@ const MatchesList = ({ navigate }) => {
 
   // Safe match data access
   const getMatchImage = (match) => {
+    if (!match)
+      return "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg";
+
     // If match has user object with avatar
     if (match.user && match.user.avatar) {
       return match.user.avatar;
@@ -131,6 +139,8 @@ const MatchesList = ({ navigate }) => {
   };
 
   const getMatchName = (match) => {
+    if (!match) return "Unknown User";
+
     // If match has user object with name
     if (match.user && match.user.name) {
       return match.user.name;
@@ -151,10 +161,12 @@ const MatchesList = ({ navigate }) => {
   };
 
   const getMatchMessages = (match) => {
+    if (!match) return [];
     return match.messages || [];
   };
 
   const getMatchDate = (match) => {
+    if (!match) return new Date().toISOString();
     return match.matchedAt || match.createdAt || new Date().toISOString();
   };
 
@@ -173,7 +185,7 @@ const MatchesList = ({ navigate }) => {
     setShowSidebar(!showSidebar);
   };
 
-  // Temporary debug - log matches structure
+  // Debug matches structure
   useEffect(() => {
     console.log("🔍 MATCHES STRUCTURE ANALYSIS:");
     matches.forEach((match, index) => {
@@ -181,9 +193,9 @@ const MatchesList = ({ navigate }) => {
         _id: match._id,
         matchId: match.matchId,
         id: match.id,
-        users: match.users,
         user: match.user,
         hasMessages: !!(match.messages && match.messages.length > 0),
+        messagesCount: match.messages?.length || 0,
       });
     });
   }, [matches]);
@@ -250,7 +262,7 @@ const MatchesList = ({ navigate }) => {
 
               return (
                 <div
-                  key={match._id} // Use _id as the primary key
+                  key={match._id || match.matchId || match.id}
                   className={`${styles.matchItem} ${
                     selectedMatch?._id === match._id ? styles.active : ""
                   }`}
@@ -324,7 +336,11 @@ const MatchesList = ({ navigate }) => {
             </div>
 
             <div className={styles.messages}>
-              {getMatchMessages(selectedMatch).length === 0 ? (
+              {loadingMessages ? (
+                <div className={styles.loadingMessages}>
+                  <p>Loading messages...</p>
+                </div>
+              ) : getMatchMessages(selectedMatch).length === 0 ? (
                 <div className={styles.noMessages}>
                   <Heart />
                   <h3>You matched with {getMatchName(selectedMatch)}!</h3>

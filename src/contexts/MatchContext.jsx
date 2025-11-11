@@ -91,12 +91,21 @@ function matchReducer(state, action) {
       );
 
       if (matchExists) {
+        console.log("⚠️ Match already exists, skipping:", action.payload._id);
         return state;
       }
 
+      // Ensure the match has _id field
+      const newMatch = {
+        ...action.payload,
+        _id: action.payload._id || action.payload.matchId || action.payload.id,
+      };
+
+      console.log("✅ Adding new match:", newMatch._id, newMatch.user?.name);
+
       return {
         ...state,
-        matches: [...state.matches, action.payload],
+        matches: [...state.matches, newMatch],
       };
     case "SET_MATCHES":
       return {
@@ -275,28 +284,44 @@ export const MatchProvider = ({ children }) => {
   };
 
   // Fetch user's matches from backend
+  // In MatchContext.js - Update fetchMatches function
   const fetchMatches = async () => {
     if (!user) return;
 
     try {
       console.log("🔄 Fetching user matches...");
       const response = await ApiService.getMatches();
-      console.log(response);
+      console.log("📦 Matches API Response:", response);
 
       if (response.success) {
         console.log(`✅ Found ${response.matches?.length || 0} matches`);
 
         // Format matches for consistent structure
-        const formattedMatches = (response.matches || []).map((match) => ({
-          ...match,
-          matchId: match._id || match.id,
-          user:
-            match.user || match.users?.find((u) => u._id !== user.id) || match,
-          messages: match.messages || [],
-          matchedAt:
-            match.createdAt || match.matchedAt || new Date().toISOString(),
-        }));
+        const formattedMatches = (response.matches || []).map((match) => {
+          // Ensure we have the correct ID structure
+          const matchId = match._id || match.matchId || match.id;
 
+          if (!matchId) {
+            console.error("❌ Match without ID found:", match);
+          }
+
+          console.log(
+            `🎯 Processing match: ${matchId} with user:`,
+            match.user?.name
+          );
+
+          return {
+            ...match,
+            _id: matchId, // Ensure _id is always set
+            matchId: matchId, // For backward compatibility
+            user: match.user || {},
+            messages: match.messages || [],
+            matchedAt:
+              match.matchedAt || match.createdAt || new Date().toISOString(),
+          };
+        });
+
+        console.log("📝 Final formatted matches:", formattedMatches);
         dispatch({ type: "SET_MATCHES", payload: formattedMatches });
       } else {
         console.error("❌ Failed to fetch matches:", response.message);

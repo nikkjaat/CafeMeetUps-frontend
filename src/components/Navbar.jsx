@@ -1,3 +1,4 @@
+// Navbar.js - Updated
 import { useState, useEffect } from "react";
 import { Heart, Menu, X } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
@@ -13,6 +14,7 @@ const Navbar = ({ currentPage, navigate, activeSection }) => {
   const [authMode, setAuthMode] = useState("login");
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMediumScreen, setIsMediumScreen] = useState(false);
+  const [isMobileScreen, setIsMobileScreen] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -21,9 +23,9 @@ const Navbar = ({ currentPage, navigate, activeSection }) => {
     };
 
     const handleResize = () => {
-      setIsMediumScreen(
-        window.innerWidth <= 1150.5 && window.innerWidth >= 768
-      );
+      const width = window.innerWidth;
+      setIsMediumScreen(width <= 1150.5 && width >= 768);
+      setIsMobileScreen(width <= 768);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -69,7 +71,7 @@ const Navbar = ({ currentPage, navigate, activeSection }) => {
               <div className={styles.logoIcon}>
                 <Heart />
               </div>
-              <span className={styles.logoText}>LoveConnect</span>
+              <span className={styles.logoText}>CafemeetUps</span>
             </div>
 
             {/* Desktop Navigation */}
@@ -81,7 +83,7 @@ const Navbar = ({ currentPage, navigate, activeSection }) => {
               isMediumScreen={isMediumScreen}
             />
 
-            {/* User Menu or Auth Buttons */}
+            {/* User Menu or Auth Buttons - ALWAYS SHOW */}
             {user ? (
               <UserMenu className={styles.userMenu} navigate={navigate} />
             ) : (
@@ -97,29 +99,54 @@ const Navbar = ({ currentPage, navigate, activeSection }) => {
                 </button>
               </div>
             )}
-
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className={styles.mobileMenuBtn}
-              aria-label="Toggle mobile menu"
-            >
-              {isMenuOpen ? <X /> : <Menu />}
-            </button>
           </div>
         </div>
-
-        <MobileMenu
-          isOpen={isMenuOpen}
-          onClose={closeMobileMenu}
-          navigate={navigate}
-          currentPage={currentPage}
-          activeSection={activeSection}
-          user={user}
-          onSignIn={handleSignIn}
-          onGetStarted={handleGetStarted}
-        />
       </nav>
+
+      {/* Floating Quick Actions for Mobile - Includes Menu Button */}
+      {user && isMobileScreen && (
+        <div className={styles.floatingActionsContainer}>
+          {/* Close button when sidebar is open */}
+          {isMenuOpen && (
+            <button
+              className={`${styles.floatingActionBtn} ${styles.closeBtn}`}
+              onClick={closeMobileMenu}
+              aria-label="Close menu"
+            >
+              <X />
+            </button>
+          )}
+
+          {/* Menu button when sidebar is closed */}
+          {!isMenuOpen && (
+            <button
+              className={`${styles.floatingActionBtn} ${styles.menuBtn}`}
+              onClick={() => setIsMenuOpen(true)}
+              aria-label="Open menu"
+            >
+              <Menu />
+            </button>
+          )}
+
+          {/* Quick Actions (Notification & Message) */}
+          <UserMenu.QuickActions
+            navigate={navigate}
+            className={styles.floatingQuickActions}
+          />
+        </div>
+      )}
+
+      {/* Mobile Sidebar */}
+      <MobileMenu
+        isOpen={isMenuOpen}
+        onClose={closeMobileMenu}
+        navigate={navigate}
+        currentPage={currentPage}
+        activeSection={activeSection}
+        user={user}
+        onSignIn={handleSignIn}
+        onGetStarted={handleGetStarted}
+      />
 
       <AuthModal
         isOpen={showAuthModal}

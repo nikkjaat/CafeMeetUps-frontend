@@ -1,29 +1,26 @@
+/* -------------------------------------------------
+   MOBILE FIRST – tiny phones (≤ 360px)
+   ------------------------------------------------- */
 .card {
-  width: 22rem;
-  height: 30rem;
-  background: white;
-  border-radius: 1.5rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 20rem; /* fits even 320 px screens */
+  height: 28rem;
+  background: #fff;
+  border-radius: 1.25rem;
   overflow: hidden;
-  cursor: grab;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
   position: relative;
-  transition: all 0.4s ease;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: grab;
+  user-select: none;
+  margin: 0 auto 5rem auto; /* space for floating buttons */
 }
-
 .card:active {
   cursor: grabbing;
 }
 
-.card:hover {
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
-  transform: translateY(-8px) scale(1.02);
-}
-
 .imageContainer {
   position: relative;
-  height: 70%;
+  height: 68%;
   overflow: hidden;
 }
 
@@ -31,457 +28,317 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s ease;
+  transition: transform 0.3s ease;
+}
+.card:hover .image {
+  transform: scale(1.06);
 }
 
 .imagePlaceholder {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+  inset: 0;
+  background: #f1f5f9;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
-.placeholderSpinner {
-  width: 2rem;
-  height: 2rem;
-  border: 2px solid #e5e7eb;
-  border-top: 2px solid #ec4899;
+.spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid #e2e8f0;
+  border-top-color: #ec4899;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
-
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
+  to {
     transform: rotate(360deg);
   }
 }
 
-.card:hover .image {
-  transform: scale(1.08);
-}
-
 .overlay {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 65%;
-  background: linear-gradient(
-    transparent 20%,
-    rgba(0, 0, 0, 0.3) 60%,
-    rgba(0, 0, 0, 0.9)
-  );
+  inset: 0 0 0 0;
+  background: linear-gradient(transparent 30%, rgba(0, 0, 0, 0.65) 100%);
 }
 
-.swipeIndicator {
+/* Badges */
+.compatibilityBadge,
+.activityIndicator {
   position: absolute;
-  top: 2rem;
-  padding: 0.75rem 1.25rem;
-  border-radius: 0.75rem;
+  top: 0.75rem;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  font-weight: bold;
-  font-size: 1.5rem;
-  border: 4px solid;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(8px);
-  transform-origin: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  gap: 0.35rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+}
+.compatibilityBadge {
+  left: 0.75rem;
+  background: rgba(34, 197, 94, 0.9);
+}
+.activityIndicator {
+  right: 0.75rem;
 }
 
+.starIcon,
+.activityIcon {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+/* Swipe hints */
+.swipeHint {
+  position: absolute;
+  top: 1.5rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+  font-size: 1rem;
+  border: 3px solid;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(6px);
+}
 .like {
-  right: 2rem;
+  right: 1rem;
   color: #10b981;
   border-color: #10b981;
-  transform: rotate(15deg);
+  transform: rotate(12deg);
 }
-
 .nope {
-  left: 2rem;
+  left: 1rem;
   color: #ef4444;
   border-color: #ef4444;
-  transform: rotate(-15deg);
+  transform: rotate(-12deg);
+}
+.swipeHint svg {
+  width: 1.2rem;
+  height: 1.2rem;
 }
 
-.swipeIndicator svg {
-  width: 1.75rem;
-  height: 1.75rem;
-}
-
+/* Card info */
 .cardInfo {
   position: absolute;
-  bottom: 1rem;
-  left: 1rem;
-  right: 1rem;
-  color: white;
-  z-index: 10;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+  bottom: 0.75rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
 }
-
 .nameAge {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
-
 .nameAge h3 {
-  font-size: 1.75rem;
-  font-weight: bold;
   margin: 0;
-  letter-spacing: -0.025em;
+  font-size: 1.35rem;
+  font-weight: 700;
 }
-
 .infoBtn {
   background: rgba(255, 255, 255, 0.25);
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 50%;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2rem;
+  height: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #fff;
   cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: 0.2s;
 }
-
-.infoBtn:hover {
-  background: rgba(255, 255, 255, 0.4);
-  transform: scale(1.15);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-}
-
-.infoBtn svg {
-  width: 1.25rem;
-  height: 1.25rem;
+.infoBtn:active {
+  transform: scale(0.9);
 }
 
 .location {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 1rem;
-  opacity: 0.9;
+  gap: 0.35rem;
+  font-size: 0.85rem;
 }
-
 .location svg {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1rem;
+  height: 1rem;
 }
 
+/* Details panel */
 .details {
-  padding: 2rem;
-  background: white;
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  border-top: 1px solid rgba(229, 231, 235, 0.5);
-  max-height: 50%;
+  max-height: 45%;
   overflow-y: auto;
-  z-index: 20;
-  backdrop-filter: blur(10px);
-  border-radius: 0 0 1.5rem 1.5rem;
+  background: #fff;
+  padding: 1rem;
+  border-top: 1px solid #e2e8f0;
 }
-
 .bio {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
   color: #374151;
-  margin-bottom: 1rem;
-  line-height: 1.6;
-  font-size: 0.95rem;
 }
 
-.interests {
+.interestBlock h4 {
+  margin: 0.75rem 0 0.35rem;
+  font-size: 0.8rem;
+  color: #1e293b;
+}
+.interestList {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
-
 .interest {
-  background: linear-gradient(
-    135deg,
-    rgba(236, 72, 153, 0.1),
-    rgba(239, 68, 68, 0.1)
-  );
-  color: #be185d;
-  padding: 0.5rem 1rem;
-  border-radius: 50px;
-  font-size: 0.875rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 2rem;
+  font-size: 0.7rem;
   font-weight: 600;
+  background: rgba(236, 72, 153, 0.1);
+  color: #be185d;
   border: 1px solid rgba(236, 72, 153, 0.2);
-  transition: all 0.3s ease;
-  backdrop-filter: blur(5px);
+}
+.interest.common {
+  background: #ec4899;
+  color: #fff;
 }
 
-.interest:hover {
-  background: linear-gradient(135deg, #ec4899, #be185d);
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
-}
-
-.actions {
-  position: absolute;
-  bottom: -2rem;
-  left: 50%;
-  transform: translateX(-50%);
+.stats {
   display: flex;
-  gap: 1rem;
-  z-index: 30;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
 }
-
-.rejectBtn,
-.likeBtn {
-  width: 4rem;
-  height: 4rem;
-  border-radius: 50%;
-  border: none;
+.stat {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.4s ease;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px);
+  justify-content: space-between;
+  font-size: 0.75rem;
+}
+.label {
+  color: #64748b;
+}
+.value {
+  font-weight: 600;
+  color: #1e293b;
 }
 
-.rejectBtn {
-  background: rgba(255, 255, 255, 0.95);
-  color: #ef4444;
-  border: 2px solid rgba(239, 68, 68, 0.3);
-}
-
-.rejectBtn:hover {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  color: white;
-  transform: scale(1.2);
-  box-shadow: 0 12px 35px rgba(239, 68, 68, 0.4);
-}
-
-.likeBtn {
-  background: linear-gradient(135deg, #ec4899, #be185d);
-  color: white;
-  border: 2px solid rgba(236, 72, 153, 0.3);
-}
-
-.likeBtn:hover {
-  background: linear-gradient(135deg, #db2777, #a21caf);
-  transform: scale(1.2);
-  box-shadow: 0 12px 35px rgba(236, 72, 153, 0.5);
-}
-
-.rejectBtn svg,
-.likeBtn svg {
-  width: 2rem;
-  height: 2rem;
-}
-
-.likeBtn svg {
-  fill: currentColor;
-}
-
-/* Tablet Styles */
-@media (min-width: 768px) and (max-width: 1023px) {
+/* -------------------------------------------------
+   TABLET (≥ 768px)
+   ------------------------------------------------- */
+@media (min-width: 768px) {
   .card {
-    width: 24rem;
+    max-width: 24rem;
     height: 32rem;
   }
-
   .nameAge h3 {
-    font-size: 2rem;
-  }
-
-  .location {
-    font-size: 1.1rem;
-  }
-
-  .swipeIndicator {
     font-size: 1.75rem;
-    padding: 1rem 1.5rem;
   }
-
-  .swipeIndicator svg {
-    width: 2rem;
-    height: 2rem;
-  }
-
-  .rejectBtn,
-  .likeBtn {
-    width: 4rem;
-    height: 4rem;
-  }
-
-  .rejectBtn svg,
-  .likeBtn svg {
-    width: 2rem;
-    height: 2rem;
-  }
-}
-
-/* Desktop Styles */
-@media (min-width: 1024px) {
-  .card {
-    width: 26rem;
-    height: 34rem;
-  }
-
-  .nameAge h3 {
-    font-size: 2.25rem;
-  }
-
   .location {
-    font-size: 1.2rem;
+    font-size: 0.95rem;
   }
-
-  .swipeIndicator {
-    font-size: 2rem;
-    padding: 1.25rem 2rem;
-  }
-
-  .swipeIndicator svg {
-    width: 2.25rem;
-    height: 2.25rem;
-  }
-
-  .details {
-    padding: 2.5rem;
-  }
-
-  .bio {
-    font-size: 1rem;
-  }
-
-  .rejectBtn,
-  .likeBtn {
-    width: 5rem;
-    height: 5rem;
-  }
-
-  .rejectBtn svg,
-  .likeBtn svg {
-    width: 2.5rem;
-    height: 2.5rem;
-  }
-}
-
-/* Mobile Styles */
-@media (max-width: 640px) {
-  .card {
-    width: 19rem;
-    height: 27rem;
-  }
-
-  .nameAge h3 {
-    font-size: 1.5rem;
-  }
-
-  .location {
-    font-size: 0.9rem;
-  }
-
-  .swipeIndicator {
+  .swipeHint {
     font-size: 1.25rem;
     padding: 0.5rem 1rem;
-    top: 1rem;
   }
-
-  .swipeIndicator svg {
-    width: 1.5rem;
-    height: 1.5rem;
-  }
-
-  .like {
-    right: 1rem;
-  }
-
-  .nope {
-    left: 1rem;
-  }
-
-  .details {
-    padding: 1rem;
-  }
-
-  .bio {
-    font-size: 0.875rem;
-  }
-
-  .interest {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.75rem;
-  }
-
-  .rejectBtn,
-  .likeBtn {
-    width: 3.5rem;
-    height: 3.5rem;
-  }
-
-  .rejectBtn svg,
-  .likeBtn svg {
-    width: 1.75rem;
-    height: 1.75rem;
+  .compatibilityBadge,
+  .activityIndicator {
+    font-size: 0.85rem;
+    padding: 0.45rem 0.75rem;
   }
 }
 
-/* Extra small mobile */
-@media (max-width: 480px) {
+/* -------------------------------------------------
+   DESKTOP (≥ 1024px)
+   ------------------------------------------------- */
+@media (min-width: 1024px) {
   .card {
-    width: 17rem;
-    height: 25rem;
+    max-width: 26rem;
+    height: 34rem;
   }
+  .nameAge h3 {
+    font-size: 2rem;
+  }
+  .location {
+    font-size: 1.05rem;
+  }
+  .details {
+    padding: 1.5rem;
+  }
+  .bio {
+    font-size: 0.95rem;
+  }
+}
 
+/* -------------------------------------------------
+   EXTRA SMALL (≤ 360px) – tighten everything
+   ------------------------------------------------- */
+@media (max-width: 360px) {
+  .card {
+    max-width: 18rem;
+    height: 26rem;
+    margin-bottom: 4.5rem;
+  }
   .nameAge h3 {
     font-size: 1.25rem;
   }
-
   .location {
     font-size: 0.8rem;
   }
-
-  .cardInfo {
-    bottom: 0.75rem;
-    left: 0.75rem;
-    right: 0.75rem;
+  .swipeHint {
+    top: 1rem;
+    font-size: 0.9rem;
+    padding: 0.3rem 0.6rem;
+  }
+  .compatibilityBadge,
+  .activityIndicator {
+    top: 0.5rem;
+    font-size: 0.65rem;
+    padding: 0.3rem 0.5rem;
+  }
+  .infoBtn {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+  .details {
+    padding: 0.75rem;
+  }
+  .interest {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.65rem;
   }
 }
 
+/* -------------------------------------------------
+   NO PROFILE FALLBACK
+   ------------------------------------------------- */
 .noProfile {
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 400px;
   text-align: center;
-  padding: 2rem;
-  background: var(--bg-secondary);
-  border-radius: 16px;
+  padding: 1.5rem;
+  color: #64748b;
 }
-
 .noProfileIcon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-}
-
-.noProfile h3 {
-  color: var(--text-primary);
+  font-size: 2.5rem;
   margin-bottom: 0.5rem;
 }
-
+.noProfile h3 {
+  margin: 0.5rem 0;
+  font-size: 1.1rem;
+}
 .noProfile p {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }

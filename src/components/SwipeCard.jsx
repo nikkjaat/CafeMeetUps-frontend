@@ -6,54 +6,41 @@ import styles from "../styles/SwipeCard.module.css";
 const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+
+  console.log(profile._id);
+
   const x = useMotionValue(0);
-  const rotate = useTransform(x, [-200, 200], [-30, 30]);
+  const rotate = useTransform(x, [-200, 200], [-25, 25]);
   const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
 
-  const handleDragEnd = (event, info) => {
-    const offset = info.offset.x;
-    const velocity = info.velocity.x;
-
-    // Add safety check - only swipe if profile exists
+  const handleDragEnd = (_, info) => {
     if (!profile) return;
-
-    if (offset > 100 || velocity > 500) {
-      console.log("👉 Swipe right triggered");
-      onSwipeRight(profile.id);
-    } else if (offset < -100 || velocity < -500) {
-      console.log("👈 Swipe left triggered");
-      onSwipeLeft(profile.id);
-    }
+    const { offset, velocity } = info;
+    if (offset.x > 100 || velocity.x > 500) onSwipeRight(profile._id);
+    else if (offset.x < -100 || velocity.x < -500) onSwipeLeft(profile._id);
   };
 
-  // Return early if no profile
   if (!profile) {
     return (
       <div className={styles.card}>
         <div className={styles.noProfile}>
-          <div className={styles.noProfileIcon}>💔</div>
+          <div className={styles.noProfileIcon}>Broken Heart</div>
           <h3>No profile available</h3>
-          <p>Please check back later for new matches</p>
+          <p>Please check back later</p>
         </div>
       </div>
     );
   }
 
-  // Calculate activity indicator
-  const getActivityIndicator = (lastActive) => {
-    if (!lastActive) return { text: "Recently active", color: "#6B7280" };
-
-    const now = new Date();
-    const lastActiveDate = new Date(lastActive);
-    const hoursDiff = (now - lastActiveDate) / (1000 * 60 * 60);
-
-    if (hoursDiff < 1) return { text: "Online now", color: "#10B981" };
-    if (hoursDiff < 24) return { text: "Active today", color: "#3B82F6" };
-    if (hoursDiff < 168) return { text: "Active this week", color: "#6B7280" };
+  const activity = (() => {
+    if (!profile.lastActive)
+      return { text: "Recently active", color: "#6B7280" };
+    const diff = (Date.now() - new Date(profile.lastActive)) / 36e5;
+    if (diff < 1) return { text: "Online now", color: "#10B981" };
+    if (diff < 24) return { text: "Active today", color: "#3B82F6" };
+    if (diff < 168) return { text: "Active this week", color: "#6B7280" };
     return { text: "Active recently", color: "#9CA3AF" };
-  };
-
-  const activityInfo = getActivityIndicator(profile.lastActive);
+  })();
 
   return (
     <motion.div
@@ -62,8 +49,9 @@ const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }) => {
       dragConstraints={{ left: 0, right: 0 }}
       style={{ x, rotate, opacity }}
       onDragEnd={handleDragEnd}
-      whileTap={{ scale: 0.95 }}
+      whileTap={{ scale: 0.96 }}
     >
+      {/* ---------- IMAGE ---------- */}
       <div className={styles.imageContainer}>
         <img
           src={
@@ -77,12 +65,13 @@ const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }) => {
         />
         {!imageLoaded && (
           <div className={styles.imagePlaceholder}>
-            <div className={styles.placeholderSpinner}></div>
+            <div className={styles.spinner}></div>
           </div>
         )}
+
         <div className={styles.overlay} />
 
-        {/* Compatibility Score Badge */}
+        {/* Compatibility badge */}
         {profile.compatibilityScore && (
           <div className={styles.compatibilityBadge}>
             <Star className={styles.starIcon} />
@@ -90,32 +79,32 @@ const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }) => {
           </div>
         )}
 
-        {/* Activity Indicator */}
+        {/* Activity indicator */}
         <div
           className={styles.activityIndicator}
-          style={{ backgroundColor: activityInfo.color }}
+          style={{ backgroundColor: activity.color }}
         >
           <Activity className={styles.activityIcon} />
-          <span>{activityInfo.text}</span>
+          <span>{activity.text}</span>
         </div>
 
-        {/* Swipe indicators */}
+        {/* Swipe hints */}
         <motion.div
-          className={`${styles.swipeIndicator} ${styles.like}`}
+          className={`${styles.swipeHint} ${styles.like}`}
           style={{ opacity: useTransform(x, [0, 100], [0, 1]) }}
         >
           <Heart />
           <span>LIKE</span>
         </motion.div>
-
         <motion.div
-          className={`${styles.swipeIndicator} ${styles.nope}`}
+          className={`${styles.swipeHint} ${styles.nope}`}
           style={{ opacity: useTransform(x, [-100, 0], [1, 0]) }}
         >
           <X />
           <span>NOPE</span>
         </motion.div>
 
+        {/* Basic info */}
         <div className={styles.cardInfo}>
           <div className={styles.nameAge}>
             <h3>
@@ -132,12 +121,13 @@ const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }) => {
             <MapPin />
             <span>
               {profile.location}
-              {profile.distance && ` • ${profile.distance}km away`}
+              {profile.distance && ` • ${profile.distance} km`}
             </span>
           </div>
         </div>
       </div>
 
+      {/* ---------- DETAILS (optional) ---------- */}
       {showDetails && (
         <motion.div
           className={styles.details}
@@ -145,66 +135,60 @@ const SwipeCard = ({ profile, onSwipeLeft, onSwipeRight }) => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
         >
-          <p className={styles.bio}>{profile.bio}</p>
+          <p className={styles.bio}>{profile.bio || "No bio yet."}</p>
 
-          {/* Common Interests */}
-          {profile.commonInterests && profile.commonInterests.length > 0 && (
-            <div className={styles.commonInterests}>
+          {/* Common interests */}
+          {profile.commonInterests?.length > 0 && (
+            <div className={styles.interestBlock}>
               <h4>Common Interests ({profile.commonInterests.length})</h4>
-              <div className={styles.interests}>
-                {profile.commonInterests.map((interest, index) => (
+              <div className={styles.interestList}>
+                {profile.commonInterests.map((i, idx) => (
                   <span
-                    key={index}
+                    key={idx}
                     className={`${styles.interest} ${styles.common}`}
                   >
-                    {typeof interest === "string"
-                      ? interest.charAt(0).toUpperCase() + interest.slice(1)
-                      : interest}
+                    {i}
                   </span>
                 ))}
               </div>
             </div>
           )}
 
-          {/* All Interests */}
-          {profile.interests && profile.interests.length > 0 && (
-            <div className={styles.allInterests}>
+          {/* All interests */}
+          {profile.interests?.length > 0 && (
+            <div className={styles.interestBlock}>
               <h4>All Interests</h4>
-              <div className={styles.interests}>
-                {profile.interests.map((interest, index) => (
+              <div className={styles.interestList}>
+                {profile.interests.map((i, idx) => (
                   <span
-                    key={index}
+                    key={idx}
                     className={`${styles.interest} ${
-                      profile.commonInterests?.includes(interest)
-                        ? styles.common
-                        : ""
+                      profile.commonInterests?.includes(i) ? styles.common : ""
                     }`}
                   >
-                    {typeof interest === "string"
-                      ? interest.charAt(0).toUpperCase() + interest.slice(1)
-                      : interest}
+                    {i}
                   </span>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Compatibility Details */}
-          <div className={styles.compatibilityDetails}>
-            <div className={styles.compatibilityItem}>
-              <span className={styles.label}>Match Score:</span>
+          {/* Compatibility stats */}
+          <div className={styles.stats}>
+            <div className={styles.stat}>
+              <span className={styles.label}>Match Score</span>
               <span className={styles.value}>
                 {profile.compatibilityScore}%
               </span>
             </div>
             {profile.distance && (
-              <div className={styles.compatibilityItem}>
-                <span className={styles.label}>Distance:</span>
-                <span className={styles.value}>{profile.distance}km</span>
+              <div className={styles.stat}>
+                <span className={styles.label}>Distance</span>
+                <span className={styles.value}>{profile.distance} km</span>
               </div>
             )}
-            <div className={styles.compatibilityItem}>
-              <span className={styles.label}>Activity Level:</span>
+            <div className={styles.stat}>
+              <span className={styles.label}>Activity</span>
               <span className={styles.value}>
                 {Math.round((profile.activityScore || 50) / 10)}/10
               </span>

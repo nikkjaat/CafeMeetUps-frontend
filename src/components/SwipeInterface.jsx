@@ -28,8 +28,6 @@ const SwipeInterface = ({ navigate, initialCategory }) => {
     categoryFilter,
     profiles,
     currentProfileIndex,
-    updateFilters,
-    loadProfiles,
     filteredProfiles,
   } = useMatch();
 
@@ -38,104 +36,21 @@ const SwipeInterface = ({ navigate, initialCategory }) => {
   const [previousMatchCount, setPreviousMatchCount] = useState(0);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const [showLikeCount, setShowLikeCount] = useState(false);
 
-  // Get current user preferences for filtering
-  const userPreferences = useMemo(() => {
-    if (!user) return null;
-
-    return {
-      age: user.age,
-      gender: user.gender,
-      interestedIn: user.interestedIn,
-      location: user.location,
-      preferences: user.preferences || {
-        ageMin: 18,
-        ageMax: 100,
-        distance: 50,
-        interests: [],
-        relationshipType: "",
-      },
+  // Prevent body scroll when sidebar is open
+  useEffect(() => {
+    if (showSidebar) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
     };
-  }, [user]);
+  }, [showSidebar]);
 
-  // Enhanced filtering logic
-  const applyAdvancedFilters = useMemo(() => {
-    if (!profiles.length || !userPreferences) return profiles;
-
-    return profiles.filter((profile) => {
-      // Basic filters - exclude current user
-      if (profile.id === user.id) return false;
-
-      // Age filter based on user preferences
-      const ageMin = userPreferences.preferences.ageMin || 18;
-      const ageMax = userPreferences.preferences.ageMax || 100;
-      if (profile.age < ageMin || profile.age > ageMax) return false;
-
-      // Gender preference matching
-      if (userPreferences.interestedIn !== "everyone") {
-        const targetGender =
-          userPreferences.interestedIn === "men"
-            ? "male"
-            : userPreferences.interestedIn === "women"
-            ? "female"
-            : null;
-
-        if (targetGender && profile.gender !== targetGender) return false;
-
-        // Check if the profile is also interested in user's gender
-        if (profile.interestedIn && profile.interestedIn !== "everyone") {
-          const profileTargetGender =
-            profile.interestedIn === "men"
-              ? "male"
-              : profile.interestedIn === "women"
-              ? "female"
-              : null;
-
-          if (
-            profileTargetGender &&
-            userPreferences.gender !== profileTargetGender
-          ) {
-            return false;
-          }
-        }
-      }
-
-      // Distance filter (simplified - would use actual coordinates in production)
-      if (userPreferences.preferences.distance && profile.distance) {
-        if (profile.distance > userPreferences.preferences.distance)
-          return false;
-      }
-
-      // Relationship type filter
-      if (
-        userPreferences.preferences.relationshipType &&
-        profile.relationshipType !==
-          userPreferences.preferences.relationshipType
-      ) {
-        return false;
-      }
-
-      // Interests filter
-      if (
-        userPreferences.preferences.interests &&
-        userPreferences.preferences.interests.length > 0
-      ) {
-        const hasCommonInterests = profile.interests?.some((interest) =>
-          userPreferences.preferences.interests.includes(interest)
-        );
-        if (!hasCommonInterests) return false;
-      }
-
-      return true;
-    });
-  }, [profiles, userPreferences, user]);
-
-  // Apply scoring and sorting
-  const scoredAndSortedProfiles = useMemo(() => {
-    return profiles.filter((profile) => profile.id !== user.id);
-  }, [profiles, user]);
-
-  // Get current profile directly from context - NO LOCAL STATE
+  // Get current profile directly from context
   const currentProfile = getCurrentProfile();
 
   // Initialize and handle category filter
@@ -145,29 +60,11 @@ const SwipeInterface = ({ navigate, initialCategory }) => {
       return;
     }
 
-    console.log("🔄 SwipeInterface initialized with user:", user.name);
-
     // Set initial category filter if provided
     if (initialCategory && initialCategory !== categoryFilter) {
-      console.log("🎯 Setting initial category:", initialCategory);
       setFilter(initialCategory);
     }
-
-    console.log("📊 Total profiles:", profiles.length);
-    console.log("📊 Filtered profiles:", scoredAndSortedProfiles.length);
-    console.log("📱 Current profile index:", currentProfileIndex);
-    console.log("📱 Current profile:", currentProfile?.name || "No profile");
-  }, [
-    user,
-    navigate,
-    initialCategory,
-    categoryFilter,
-    setFilter,
-    scoredAndSortedProfiles,
-    profiles.length,
-    currentProfileIndex,
-    currentProfile,
-  ]);
+  }, [user, navigate, initialCategory, categoryFilter, setFilter]);
 
   // Handle match modal
   useEffect(() => {
@@ -179,25 +76,57 @@ const SwipeInterface = ({ navigate, initialCategory }) => {
     setPreviousMatchCount(matches.length);
   }, [matches, previousMatchCount]);
 
-  // Fixed swipe handlers - no setTimeout, no local state updates
+  // Swipe handlers
   const handleSwipeLeft = (profileId) => {
-    if (!currentProfile) {
-      console.log("⚠️ No current profile to swipe left");
-      return;
-    }
-    console.log("👈 Swiping left on:", currentProfile.name);
+    if (!currentProfile) return;
     swipeLeft(profileId);
-    // The current profile will automatically update via getCurrentProfile()
   };
 
-  const handleSwipeRight = (profileId) => {
-    if (!currentProfile) {
-      console.log("⚠️ No current profile to swipe right");
-      return;
+  const handleSwipeRight = async (profileId) => {
+    console.log(profileId);
+    if (!currentProfile) return;
+
+    try {
+      const res = await fetch(`/api/like/${profileId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+      const data = await res.json();
+
+      if (!data.success) throw new Error(data.message);
+
+      // UI: animate the card flying right
+      swipeRight(profileId);
+
+      // If it's a match → open modal instantly
+      if (data.isMatch) {
+        const newMatch = {
+          _id: data.match._id,
+          user: {
+            _id: currentProfile.id,
+            name: currentProfile.name,
+            age: currentProfile.age,
+            avatar: currentProfile.images?.[0],
+            location: currentProfile.location,
+          },
+          lastMessage: data.match.lastMessage,
+          matchedAt: data.match.createdAt,
+        };
+        setLatestMatch(newMatch);
+        setShowMatchModal(true);
+      }
+
+      // Optional: show like count for a few seconds
+      if (currentProfile.likeCount > 0) {
+        setShowLikeCount(true);
+        setTimeout(() => setShowLikeCount(false), 2000);
+      }
+    } catch (err) {
+      console.error(err);
+      // fallback to context swipe (offline mode)
+      swipeRight(profileId);
     }
-    console.log("👉 Swiping right on:", currentProfile.name);
-    swipeRight(profileId);
-    // The current profile will automatically update via getCurrentProfile()
   };
 
   const handleCategoryFilter = (category) => {
@@ -210,7 +139,6 @@ const SwipeInterface = ({ navigate, initialCategory }) => {
   };
 
   const handleReset = () => {
-    console.log("🔄 Manual reset triggered");
     resetProfiles();
   };
 
@@ -301,63 +229,40 @@ const SwipeInterface = ({ navigate, initialCategory }) => {
 
       {/* Main Content */}
       <div className={styles.mainContent}>
-        <div className={styles.header}>
-          <button
-            className={styles.menuBtn}
-            onClick={() => setShowSidebar(true)}
-          >
-            <Menu />
-          </button>
-          <div className={styles.headerLeft}>
-            <h2 className={styles.title}>Discover People</h2>
-            <p className={styles.subtitle}>
-              {matchingStats.filteredProfiles > 0
-                ? `${matchingStats.remaining} potential matches nearby`
-                : "No matches found with current filters"}
-            </p>
-          </div>
-          <div className={styles.controls}>
-            <button
-              className={styles.filterBtn}
-              onClick={() => setShowFilterPanel(true)}
-            >
-              <Filter />
-            </button>
-            <button className={styles.resetBtn} onClick={handleReset}>
-              <RotateCcw />
-            </button>
-            <button className={styles.settingsBtn}>
-              <Settings />
-            </button>
-          </div>
-        </div>
-
         <div className={styles.cardContainer}>
           {currentProfile ? (
             <>
               <SwipeCard
-                profile={currentProfile}
+                profile={{
+                  ...currentProfile,
+                  likeCount: currentProfile.likeCount || 0, // <-- pass likeCount
+                }}
                 onSwipeLeft={handleSwipeLeft}
                 onSwipeRight={handleSwipeRight}
+                showLikeCount={showLikeCount} // <-- animate badge
               />
-              <div className={styles.actionButtons}>
+
+              {/* Floating buttons – call same handler */}
+              <div className={styles.floatingSwipeButtons}>
                 <button
-                  className={styles.passBtn}
+                  className={styles.floatingPassBtn}
                   onClick={() => handleSwipeLeft(currentProfile.id)}
                 >
-                  <X />
+                  <X size={28} />
                 </button>
+
                 <button
-                  className={styles.superLikeBtn}
-                  onClick={() => handleSwipeRight(currentProfile.id)}
+                  className={styles.floatingSuperLikeBtn}
+                  onClick={() => handleSwipeRight(currentProfile._id)}
                 >
-                  ⭐
+                  Star
                 </button>
+
                 <button
-                  className={styles.likeBtn}
-                  onClick={() => handleSwipeRight(currentProfile.id)}
+                  className={styles.floatingLikeBtn}
+                  onClick={() => handleSwipeRight(currentProfile._id)}
                 >
-                  <Heart />
+                  <Heart size={28} fill="currentColor" />
                 </button>
               </div>
             </>
@@ -386,21 +291,33 @@ const SwipeInterface = ({ navigate, initialCategory }) => {
           )}
         </div>
 
-        <div className={styles.instructions}>
-          <div className={styles.instructionItem}>
-            <div className={styles.swipeIcon}>👈</div>
-            <span>Swipe left to pass</span>
-          </div>
-          <div className={styles.instructionItem}>
-            <div className={styles.swipeIcon}>👉</div>
-            <span>Swipe right to like</span>
-          </div>
-          {matchingStats.filteredProfiles > 0 && (
-            <div className={styles.instructionItem}>
-              <div className={styles.swipeIcon}>⭐</div>
-              <span>Sorted by compatibility</span>
-            </div>
-          )}
+        {/* Bottom Navigation Bar - Only navigation buttons */}
+        <div className={styles.bottomNav}>
+          <button
+            className={styles.navBtn}
+            onClick={() => setShowFilterPanel(true)}
+          >
+            <Filter size={24} />
+            <span>Filters</span>
+          </button>
+
+          <button
+            className={styles.navBtn}
+            onClick={() => setShowSidebar(true)}
+          >
+            <Sliders size={24} />
+            <span>Categories</span>
+          </button>
+
+          <button className={styles.navBtn} onClick={handleReset}>
+            <RotateCcw size={24} />
+            <span>Reset</span>
+          </button>
+
+          <button className={styles.navBtn}>
+            <Settings size={24} />
+            <span>Settings</span>
+          </button>
         </div>
       </div>
 
@@ -408,7 +325,10 @@ const SwipeInterface = ({ navigate, initialCategory }) => {
         <MatchModal
           match={latestMatch}
           onClose={() => setShowMatchModal(false)}
-          onSendMessage={handleSendMessage}
+          onSendMessage={() => {
+            setShowMatchModal(false);
+            navigate("matches");
+          }}
         />
       )}
     </div>

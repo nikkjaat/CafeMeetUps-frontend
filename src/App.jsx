@@ -19,6 +19,7 @@ import BlogPage from "./pages/BlogPage";
 import StoryDetailPage from "./pages/StoryDetailPage";
 import BlogDetailPage from "./pages/BlogDetailPage";
 import "./App.css";
+import { SocketProvider } from "./contexts/SocketContext";
 
 // Main App component wrapped with Router
 function App() {
@@ -26,7 +27,9 @@ function App() {
     <Router>
       <AuthProvider>
         <MatchProvider>
-          <AppContent />
+          <SocketProvider>
+            <AppContent />
+          </SocketProvider>
         </MatchProvider>
       </AuthProvider>
     </Router>
